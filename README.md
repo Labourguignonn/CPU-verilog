@@ -44,4 +44,7 @@ mult (xx)
 ALU (xx)
 -----
 CPU (xx)
+-----
 ctrl_unit (xx)
+-----
+
