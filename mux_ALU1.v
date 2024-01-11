@@ -3,7 +3,7 @@ module mux_ALU1(
     input wire [31:0] AOut, 
     input wire [31:0]zero,
     input wire [31:0]auxOut,
-    input wire ALU1control,
+    input wire [1:0] ALU1control,
     output wire [31:0] ALU1Out
 );
 
