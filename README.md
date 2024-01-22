@@ -1,9 +1,9 @@
 CPU EM VERILOG ----
-mux_A (OK) 
------
 mux_adress(OK)
 -----
 mux_ALU1 (OK)
+-----
+mux_reg(OK)
 -----
 mux_ALU2 (OK)
 -----
@@ -15,6 +15,8 @@ mux_extend(OK)
 -----
 concat(OK)
 -----
+shift_left26to28(OK)
+-----
 mux_Hi(OK)
 -----
 mux_Lo(OK)
@@ -23,26 +25,31 @@ sign_extend16(OK)
 -----
 sign_extend1(xx - o LT) 
 -----
-shift_left2(OK- o que fica perto do extend)
+shift_left2(OK)
 -----
 mux_data(OK)
 -----
-shift_left2(xx- o que fica perto do load size) 
+shift_left16to32(OK) 
 -----
 mux_shiftIn(OK)
 -----
 mux_shamt(OK)
 -----
+mux_memwrite(OK)
+-----
 mux_pc(OK)
 -----
-div (xx)
+div (OK)
 -----
 mult (xx)
 -----
-ALU (xx)
+ALU (OK)
 -----
 CPU (xx)
 -----
 ctrl_unit (xx)
 -----
+load_size (xx)
+-----
+store_size(xx)
 
