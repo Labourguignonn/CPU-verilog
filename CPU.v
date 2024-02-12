@@ -12,15 +12,29 @@ module CPU(
     wire zero_D; //divisão por zero 
 
 // control wires 
-
+    // control wires um bit
     wire divControl; 
     wire multControl;
-    wire aControl;
-    wire bControl;
-    wire exControl;
-    wire Hicontrol;
-    wire Locontrol;
-    wire memwritecontrol;
+    wire muxAControl;
+    wire muxBControl;
+    wire extControl;
+    wire muxHicontrol;
+    wire muxLocontrol;
+    wire MemWriteControl;
+    wire MemReadControl;
+    wire concatControl;
+    wire RegWrite;
+    wire AluOutWrite;
+    wire HiWrite;
+    wire LoWrite;
+    wire PCWrite;
+    wire EPCWrite;
+    wire LTWrite;
+    wire RegAuxWrite;
+    wire ShiftRegWrite;
+    wire RegAWrite;
+    wire RegBWrite;
+    wire MDRWrite;
 
 
 // control wires dois bits
@@ -31,7 +45,9 @@ module CPU(
     wire shiftincontrol;
 
 // control wires três bits
-    wire dataControl;
+    wire ALUControl;
+    wire muxData;
     wire muxPCcontrol;
     wire RegControl;
+    wire 
 
