@@ -50,7 +50,6 @@ module div(
                 cycle <= cycle - 5'd1;  
             end
             else begin  
-                // Set up for an unsigned divide.  
                 cycle <= 5'd31;     
                 result <= aInput;  
                 divisor <= bInput;  

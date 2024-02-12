@@ -23,7 +23,7 @@ mux_Lo(OK)
 -----
 sign_extend16(OK)
 -----
-sign_extend1(xx - o LT) 
+sign_extend_LT(OK) 
 -----
 shift_left2(OK)
 -----
@@ -41,7 +41,7 @@ mux_pc(OK)
 -----
 div (OK)
 -----
-mult (xx)
+mult (OK)
 -----
 ALU (OK)
 -----
@@ -49,7 +49,7 @@ CPU (xx)
 -----
 ctrl_unit (xx)
 -----
-load_size (xx)
+load_size (OK - +/-)
 -----
-store_size(xx)
+store_size(OK)
 
