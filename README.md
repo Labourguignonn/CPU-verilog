@@ -45,11 +45,11 @@ mult (OK)
 -----
 ALU (OK)
 -----
-CPU (xx)
+CPU (OK-- falta unidade de controle)
 -----
 ctrl_unit (xx)
 -----
-load_size (OK - +/-)
+load_size (OK)
 -----
 store_size(OK)
 

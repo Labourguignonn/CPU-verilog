@@ -1,10 +1,9 @@
 module concat(
     input wire [31:0] PCOut,
-    output wire [28:0] concOut;
+    input wire [27:0] sl26to28,
+    output wire [28:0] concatOut;
     );
 
-    //procurar saber o que é SOut
-
-    assign concOut = {PCOut[31:28], SOut};
+    assign concatOut = {PCOut[31:28], sl26to28};
     
 endmodule

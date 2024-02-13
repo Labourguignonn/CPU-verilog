@@ -1,6 +1,8 @@
 //VER SE ESTAR TRATANDO A EXCEÇÃO CORRETAMENTE! 
 
-module LS(input wire [1:0] loadSel,
+module LS(inout wire clk, 
+          input wire reset,
+          input wire [1:0] loadSel,
           input wire [31:0] mdrOut,
           input wire [1:0] exceptionControl,
           output wire [31:0] lsOutD,

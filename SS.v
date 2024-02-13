@@ -1,4 +1,6 @@
-module SS(input wire [1:0] storeSel,
+module SS(input clk, 
+          input reset,
+          input wire [1:0] storeSel,
           input wire [31:0] bOut,
           input wire [31:0] mdrOut,
           output wire [31:0] ssOut);
