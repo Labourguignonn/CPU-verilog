@@ -15,8 +15,8 @@ module CPU(
     wire IsBGT;
     wire IsBLE;
 
-// control wires 
-    // control wires um bit
+// CONTROL WIRES 
+    // um bit
     wire divControl; 
     wire multControl;
     wire muxAControl;
@@ -43,7 +43,7 @@ module CPU(
     wire instructRegWrite;
 
 
-// control wires de dois bits
+    // dois bits
     wire [1:0] ALU1Control;
     wire [1:0] ALU2Control;
     wire [1:0] muxShamtControl;
@@ -52,7 +52,7 @@ module CPU(
     wire [1:0] loadSel;
     wire [1:0] exceptionControl;
 
-// control wires de três bits
+    // três bits
     wire [2:0] ALUControl;
     wire [2:0] muxDataControl;
     wire [2:0] muxPCControl;
@@ -60,24 +60,25 @@ module CPU(
     wire [2:0] muxAddressControl;
     wire [2:0] shiftControl;
 
-// wire de quatro bits
+// WIRES DE CARREGAMENTO
+    // wire de quatro bits
     wire [3:0] pc31to28;            // Fio que bifurca do pc e entra no concat (PC[31:28])
 
-// wires de cinco bits
+    // wires de cinco bits
     wire [4:0] code29toReg;         // Código 29 que entra no muxReg
     wire [4:0] code31toReg;         // Código 31 que entra no muxReg
     wire [4:0] muxRegOut;           // Fio que sai do muxReg
     wire [4:0] muxShamtOut;         // Fio que sai do muxShamt
     wire [4:0] num24toMuxShamt      // 24 que entra no muxShamt
     
-// wires de 16 bits
+    // wires de 16 bits
     wire [15:0] instruct15to0;      // Instruções [15:0] que saem do registrador de instruções
     wire [15:0] muxExtOut;          // Fio que sai do muxExtend
 
-// wire de 28 bits
+    // wire de 28 bits
     wire [27:0] sl26to28Out;        // Fio que sai do shift left de 26 para 28 bits
     
-// wires 32 bits
+    // wires 32 bits
     wire [31:0] pcOut;              // Fio que sai do PC
     wire [31:0] opExcOut;           // Código 253 (opcode) que entra no muxAddress
     wire [31:0] ofExcOut;           // Código 254 (overflow) que entra no muxAddress
@@ -131,7 +132,7 @@ module CPU(
     wire [15:0] immediate; //16
     wire [25:0] inst25to0 //junção de rs, rt e opcode
 
-//Registradores 
+//REGISTRADORES
 Registrador A( 
     clk, 
     reset, 
@@ -212,19 +213,20 @@ mux_B muxB(
 );
 
 mux_address muxAdress(
-    pcOut,
-    opExcOut,
-    ofExcOut,
-    dbzExcOut,
-    aluOut,
-    muxAddressControl,
-    muxAddressOut  
+    pcOut, //in
+    opExcOut,//in
+    ofExcOut,//in
+    dbzExcOut,//in
+    aluOut,//in
+    muxAddressControl, //control
+    muxAddressOut //out 
 );
 
 mux_memwrite muxMemWrite(
     ssOut, //in
     bOut, //in
-    muxMemWriteOut
+    muxMemWrite, //control
+    muxMemWriteOut //out
 );
 
 mux_pc muxPC( 
@@ -233,13 +235,15 @@ mux_pc muxPC(
     aluOut, // in
     concatOut, // in 
     aluResult, // in
-    muxPCOut
+    muxPCControl, //control
+    muxPCOut //out
 );
 
 mux_extend muxExt(
     ls16Out, //in
     immediate, //in
-    muxExtOut
+    muxExtControl, //control
+    muxExtOut //out
 );
 
 mux_reg muxReg(
@@ -247,6 +251,8 @@ mux_reg muxReg(
     instruct20to16,
     code29toReg,
     code31toReg,
+    instruct15to0,
+    muxRegControl,
     immediate  
 );
 
@@ -280,6 +286,7 @@ mux_shamt muxShamt(
     immediate,
     bOut,
     num24toMuxShamt,
+    muxShamtControl,
     muxShamtOut
 );
 
@@ -306,6 +313,7 @@ mux_HI muxHI (
 mux_LO muxLO (
     multLoOut,
     divLoOut,
+    muxLoControl,
     muxLoOut
 );
 
