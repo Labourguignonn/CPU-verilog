@@ -188,7 +188,7 @@ module control_unit2 (
                 IordD = 3'b000;
                 ALUOp = 3'b000;
                 PCSource = 3'b000;
-                MemToReg = 3'b111; //
+                MemToReg = 3'b111; 
                 ShiftControl = 3'b000;
 
                 rst_out = 1'b1;
