@@ -1,69 +1,55 @@
 module control_unit2 (
-// OK   
     input wire clk,
     input wire reset,
     output reg PCWrite,
-    output reg MemWrite,
-    output reg instructRegWrite,
+    output reg PCWriteCond,
+    output reg MemControl,
+    output reg IRWrite,
     output reg RegWrite,
-    output reg RegAWrite,
-    output reg RegBWrite,
-    output reg AluOutWrite,
-    output reg MDRWrite,
-    output reg HiWrite,
-    output reg LoWrite,
-    output reg EPCWrite,
-    output reg ShiftRegWrite,
-    output reg divControl, 
-    output reg multControl,
-    output reg muxAControl,
-    output reg muxBControl,
-    output reg muxExtControl,
-    output reg muxHiControl,
-    output reg muxLoControl,
-    output reg muxMemWrite,
-    output reg MemRead,
-    output reg concatControl,
-    output reg LTWrite,
-    output reg RegAuxWrite,
+    output reg LoadA,
+    output reg LoadB,
+    output reg ALUSrA,
+    output reg LoadALUOUT,
+    output reg LoadMDR,
+    output reg LoadHi,
+    output reg LoadLo,
+    output reg LoadEPC,
+    output reg NumberShift,
+    output reg InputShift,
+    output reg LTout,
+    output reg LSControl,
 
     //flags
-    input wire ovf,
-    input wire eq,
-    input wire gt,
-    input wire lt,
-    input wire zero,
-    input wire ng,
-    input wire zero_D,
-    input wire IsBEQ,
-    input wire IsBNE,
-    input wire IsBGT,
-    input wire IsBLE,
+    input wire Of,
+    input wire Ng,
+    input wire Zr,
+    input wire Eq,
+    input wire Gt,
+    input wire Lt,
+    input wire DivZero,
 
     //2 bits
-    output reg [1:0] ALU1Control,
-    output reg [1:0] ALU2Control,
-    output reg [1:0] muxShamtControl,
-    output reg [1:0] muxShiftInControl,
-    output reg [1:0] storeSel,
-    output reg [1:0] loadSel,
-    output reg [1:0] exceptionControl,
+    output reg [1:0] RegDST,
+    output reg [1:0] ALUSrB,
+    output reg [1:0] RegReadOne,
+    output reg [1:0] CondControl,
+    output reg [1:0] LSControlSignal,
+    output reg [1:0] MultDiv,
     
     //3 bits
-    output reg[2:0] ALUControl,
-    output reg[2:0] muxDataControl,
-    output reg[2:0] muxPCControl,
-    output reg[2:0] muxRegControl,
-    output reg[2:0] muxAddressControl,
+    output reg[2:0] IordD,
+    output reg[2:0] ALUOp,
+    output reg[2:0] PCSource,
+    output reg[2:0] MemToReg,
     output reg[2:0] ShiftControl,
 
     //Instrucoes
-    input wire [5:0] instruct31to26,
-    input wire [15:0] immediate;
-    output reg rst
+    input wire [5:0] OPCode,
+    input wire [5:0] Funct,
+    output reg rst_out
 );
 
-//Variáveis
+//Variaveis
     reg [5:0] Counter;
     reg [5:0] State;
 
@@ -100,10 +86,10 @@ module control_unit2 (
     parameter ST_SRA = 6'd24;
     parameter ST_SRAV = 6'd25;
 
-    parameter ST_SW = 6'd26; //store
+    parameter ST_SW = 6'd26;
 
-    parameter ST_OF = 6'd27; //overflow
-    parameter ST_DIVZ = 6'd28; //div0
+    parameter ST_OF = 6'd27;
+    parameter ST_DIVZ = 6'd28;
 
     parameter ST_LW = 6'd29;
     parameter ST_LH = 6'd30;
@@ -160,13 +146,12 @@ module control_unit2 (
     parameter SW = 6'h2b;
 
     //Type J
-    parameter J = 6'h2;
-    parameter JAL = 6'h3;
-//
+    parameter J = 6'h2; //10
+    parameter JAL = 6'h3; //11
 
     initial begin
         //Da o reset inicial na maquina
-        rst = 1'b1; //instrução que realiza a confirmação do reset
+        rst_out = 1'b1;
         State = ST_ADD;
     end
 
@@ -174,62 +159,28 @@ module control_unit2 (
         if (reset == 1'b1) begin
             if (State != ST_RESET) begin
                 State = ST_RESET;
-                PCWrite,
-                MemWrite,
-                instructRegWrite,
-                RegWrite,
-                RegAWrite,
-                RegBWrite,
-                AluOutWrite,
-                MDRWrite,
-                HiWrite,
-                LoWrite,
-                EPCWrite,
-                ShiftRegWrite,
-                divControl, 
-                multControl,
-                muxAControl,
-                muxBControl,
-                muxExtControl,
-                muxHiControl,
-                muxLoControl,
-                muxMemWrite,
-                MemRead,
-                concatControl,
-                reg LTWrite,
-                reg RegAuxWrite,
-
-
-                rst = 1'b1;
-                Counter = 6'd0;
-            end
-            else begin
-                State = ST_COMMON;
 
                 PCWrite = 1'b0;
-                IsBEQ = 1'b0;
-                IsBNE = 1'b0;
-                IsBGT = 1'b0;
-                IsBLE = 1'b0;
-                MemWrite = 1'b0;
-                instructRegWrite = 1'b0;
+                PCWriteCond = 1'b0;
+                MemControl = 1'b0;
+                IRWrite = 1'b0;
                 RegWrite = 1'b1; //
-                RegAWrite = 1'b0;
-                RegBWrite = 1'b0;
-                muxAlu1Control = 1'b0;
-                RegAWriteLUOUT = 1'b0;
-                MDRWrite = 1'b0;
+                LoadA = 1'b0;
+                LoadB = 1'b0;
+                ALUSrA = 1'b0;
+                LoadALUOUT = 1'b0;
+                LoadMDR = 1'b0;
                 MultDiv = 2'b00;
-                HiWrite = 1'b0;
-                LoWrite = 1'b0;
-                EPCWrite = 1'b0;
-                ShiftRegWrite = 1'b0;
-                
+                LoadHi = 1'b0;
+                LoadLo = 1'b0;
+                LoadEPC = 1'b0;
+                InputShift = 1'b0;
+                NumberShift = 1'b0;
                 LTout = 1'b0;
                 LSControl = 1'b0;
 
                 RegDST = 2'b10; //
-                muxAlu2Control = 2'b00;
+                ALUSrB = 2'b00;
                 RegReadOne = 2'b00;
                 CondControl = 2'b00;
                 LSControlSignal = 2'b00;
@@ -240,7 +191,45 @@ module control_unit2 (
                 MemToReg = 3'b111; //
                 ShiftControl = 3'b000;
 
-                rst = 1'b0;
+                rst_out = 1'b1;
+
+                Counter = 6'd0;
+            end
+            else begin
+                State = ST_COMMON;
+
+                PCWrite = 1'b0;
+                PCWriteCond = 1'b0;
+                MemControl = 1'b0;
+                IRWrite = 1'b0;
+                RegWrite = 1'b1; //
+                LoadA = 1'b0;
+                LoadB = 1'b0;
+                ALUSrA = 1'b0;
+                LoadALUOUT = 1'b0;
+                LoadMDR = 1'b0;
+                MultDiv = 2'b00;
+                LoadHi = 1'b0;
+                LoadLo = 1'b0;
+                LoadEPC = 1'b0;
+                InputShift = 1'b0;
+                NumberShift = 1'b0;
+                LTout = 1'b0;
+                LSControl = 1'b0;
+
+                RegDST = 2'b10; //
+                ALUSrB = 2'b00;
+                RegReadOne = 2'b00;
+                CondControl = 2'b00;
+                LSControlSignal = 2'b00;
+                
+                IordD = 3'b000;
+                ALUOp = 3'b000;
+                PCSource = 3'b000;
+                MemToReg = 3'b111; //
+                ShiftControl = 3'b000;
+
+                rst_out = 1'b0;
 
                 Counter = 6'd0;
             end
@@ -253,30 +242,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11;
+                        ALUSrB = 2'b11;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -287,7 +273,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -296,30 +282,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b1;  
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b1;  
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0; 
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0; 
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //PC+4
+                        ALUSrB = 2'b11; //PC+4
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -330,7 +313,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -339,30 +322,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1;
-                        RegBWrite = 1'b1;
-                        muxAlu1Control = 1'b0; //PC
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1;
+                        LoadB = 1'b1;
+                        ALUSrA = 1'b0; //PC
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b10; //Immediate
+                        ALUSrB = 2'b10; //Immediate
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -373,7 +353,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -513,30 +493,27 @@ module control_unit2 (
                         endcase
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -547,7 +524,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -557,30 +534,27 @@ module control_unit2 (
                         State = ST_ADD;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -591,7 +565,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -599,30 +573,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -633,7 +604,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
 
@@ -649,27 +620,27 @@ module control_unit2 (
                         State = ST_ADDI;
 
                         PCWrite = 1'b0;   
-                        PCWriteCond     
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
+                        ALUSrB = 2'b01;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -680,7 +651,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -688,30 +659,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
+                        ALUSrB = 2'b01;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -722,7 +690,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 3'b000;
 
@@ -739,30 +707,27 @@ module control_unit2 (
                         State = ST_OPN;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0; //
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b1; //
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b1; //
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
+                        ALUSrB = 2'b11; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -773,7 +738,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -782,30 +747,27 @@ module control_unit2 (
                         State = ST_OPN;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -816,7 +778,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -825,30 +787,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -859,7 +818,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -871,30 +830,27 @@ module control_unit2 (
                         State = ST_OF;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0; //
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b1; //
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b1; //
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
+                        ALUSrB = 2'b11; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -905,7 +861,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -914,30 +870,27 @@ module control_unit2 (
                         State = ST_OF;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -948,7 +901,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -957,30 +910,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -991,7 +941,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1001,30 +951,27 @@ module control_unit2 (
                         State = ST_ADDIU;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
+                        ALUSrB = 2'b01;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1035,7 +982,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1043,30 +990,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
+                        ALUSrB = 2'b01;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1077,7 +1021,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 3'b000;
                     end
@@ -1087,30 +1031,27 @@ module control_unit2 (
                         State = ST_AND;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;  
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1121,7 +1062,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1129,30 +1070,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1163,7 +1101,7 @@ module control_unit2 (
                         MemToReg = 3'b000;  
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1173,30 +1111,27 @@ module control_unit2 (
                         State = ST_SUB;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1207,7 +1142,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;  
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1215,30 +1150,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1249,7 +1181,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                         
@@ -1265,29 +1197,26 @@ module control_unit2 (
                         State = ST_DIV;
 
                         PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;  
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;  
+                        LoadB = 1'b0;  
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b10;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1298,7 +1227,7 @@ module control_unit2 (
                         MemToReg = 3'b000;  
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1306,30 +1235,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;  
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b10;
-                        HiWrite = 1'b1; 
-                        LoWrite =  1'b1;
+                        LoadHi = 1'b1; 
+                        LoadLo =  1'b1;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1340,7 +1266,7 @@ module control_unit2 (
                         MemToReg = 3'b000; 
                         ShiftControl = 3'b000;  
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
 
@@ -1356,30 +1282,27 @@ module control_unit2 (
                         State = ST_DIVZ;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0; //
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b1; //
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b1; //
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
+                        ALUSrB = 2'b11; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1390,7 +1313,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -1399,30 +1322,27 @@ module control_unit2 (
                         State = ST_DIVZ;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1433,7 +1353,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
 
@@ -1442,30 +1362,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1476,7 +1393,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1486,30 +1403,27 @@ module control_unit2 (
                         State = ST_MULT;
 
                         PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b01;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;  
+                        ALUSrB = 2'b00;  
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1520,7 +1434,7 @@ module control_unit2 (
                         MemToReg = 3'b000;  
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1528,30 +1442,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b01;
-                        HiWrite = 1'b1; 
-                        LoWrite =  1'b1;
+                        LoadHi = 1'b1; 
+                        LoadLo =  1'b1;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1562,7 +1473,7 @@ module control_unit2 (
                         MemToReg = 3'b000;   
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1572,30 +1483,27 @@ module control_unit2 (
                         State = ST_MFHI;
 
                         PCWrite = 1'b0; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0; 
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0; 
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1606,7 +1514,7 @@ module control_unit2 (
                         MemToReg = 3'b010;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1614,30 +1522,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;  
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1648,7 +1553,7 @@ module control_unit2 (
                         MemToReg = 3'b010;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1658,30 +1563,27 @@ module control_unit2 (
                         State = ST_MFLO;
 
                         PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;  
+                        ALUSrB = 2'b00;  
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1692,7 +1594,7 @@ module control_unit2 (
                         MemToReg = 3'b011;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1700,30 +1602,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;   
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;   
+                        LoadB = 1'b0;   
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
+                        LoadHi = 1'b0; 
+                        LoadLo =  1'b0; 
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
+                        ALUSrB = 2'b00;   
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1734,7 +1633,7 @@ module control_unit2 (
                         MemToReg = 3'b011;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1744,30 +1643,27 @@ module control_unit2 (
                         State = ST_JR; 
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
+                        LoadHi = 1'b0; 
+                        LoadLo =  1'b0; 
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1778,7 +1674,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1786,30 +1682,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
+                        LoadHi = 1'b0; 
+                        LoadLo =  1'b0; 
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1820,7 +1713,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -1830,30 +1723,27 @@ module control_unit2 (
                         State = ST_RTE;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1864,7 +1754,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -1872,30 +1762,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -1906,7 +1793,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
                         
                         Counter = 6'd0;
                     end
@@ -1915,30 +1802,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                    IsBNE = 1'b1;
-                    IsBGT = 1'b0;
-                    IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b1;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                    LoadHi = 1'b0; 
+                    LoadLo =  1'b0; 
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b00;
                     LSControlSignal = 2'b00;
@@ -1949,7 +1833,7 @@ module control_unit2 (
                     MemToReg = 3'b011;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -1957,30 +1841,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b1;
-                    IsBNE = 1'b0;
-                    IsBGT = 1'b0;
-                    IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b1;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                    LoadHi = 1'b0; 
+                    LoadLo =  1'b0; 
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b01;
                     LSControlSignal = 2'b00;
@@ -1991,7 +1872,7 @@ module control_unit2 (
                     MemToReg = 3'b011;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -1999,30 +1880,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                    IsBNE = 1'b0;
-                    IsBGT = 1'b0;
-                    IsBLE = 1'b1;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b1;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                    LoadHi = 1'b0; 
+                    LoadLo =  1'b0; 
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b10;
                     LSControlSignal = 2'b00;
@@ -2033,7 +1911,7 @@ module control_unit2 (
                     MemToReg = 3'b011;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -2041,30 +1919,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                    IsBNE = 1'b0;
-                    IsBGT = 1'b1;
-                    IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b1;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                    LoadHi = 1'b0; 
+                    LoadLo =  1'b0; 
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b11;
                     LSControlSignal = 2'b00;
@@ -2075,7 +1950,7 @@ module control_unit2 (
                     MemToReg = 3'b011;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -2083,30 +1958,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b0;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0;
-                    LoWrite = 1'b0;
+                    LoadHi = 1'b0;
+                    LoadLo = 1'b0;
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b1;
                     LSControl = 1'b0;
 
                     RegDST = 2'b00;
-                    muxAlu2Control = 2'b01;
+                    ALUSrB = 2'b01;
                     RegReadOne = 2'b00;
                     CondControl = 2'b00;
                     LSControlSignal = 2'b00;
@@ -2117,7 +1989,7 @@ module control_unit2 (
                     MemToReg = 3'b000;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -2125,30 +1997,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b0;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b0;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b0;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0;
-                    LoWrite = 1'b0;
+                    LoadHi = 1'b0;
+                    LoadLo = 1'b0;
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b00;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b00;
                     LSControlSignal = 2'b00;
@@ -2159,7 +2028,7 @@ module control_unit2 (
                     MemToReg = 3'b110;
                     ShiftControl = 3'b000;
                         
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -2168,30 +2037,27 @@ module control_unit2 (
                         State = ST_J;
 
                         PCWrite = 1'b1; //segundo
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2202,7 +2068,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                             
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -2210,30 +2076,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; //segundo
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2244,7 +2107,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                             
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -2254,30 +2117,27 @@ module control_unit2 (
                         State = ST_JAL;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2288,7 +2148,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -2296,30 +2156,27 @@ module control_unit2 (
                         State = ST_J;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b11;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2330,7 +2187,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -2339,27 +2196,24 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_SLL;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b1;   ///
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b1;   ///
                         NumberShift = 1'b1;   ///
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2369,33 +2223,30 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b001;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SLL;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;   ///
-                           ///
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;   ///
+                        NumberShift = 1'b0;   ///
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2405,34 +2256,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b010;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
                         
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2442,7 +2290,7 @@ module control_unit2 (
                         MemToReg = 3'b100;   ///
                         ShiftControl = 3'b000;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;   ///
                     end
@@ -2451,27 +2299,24 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_SRL;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b1;   ///
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b1;   ///
                         NumberShift = 1'b1;   ///
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2481,34 +2326,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b001;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRL;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;   ///
-                           ///
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;   ///
+                        NumberShift = 1'b0;   ///
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2518,34 +2360,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b011;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2555,7 +2394,7 @@ module control_unit2 (
                         MemToReg = 3'b100;   ///
                         ShiftControl = 3'b000;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
                         
                         Counter = 6'd0;   ///
                     end
@@ -2564,27 +2403,24 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_SRA;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b1;   ///
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b1;   ///
                         NumberShift = 1'b1;   ///
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2594,34 +2430,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b001;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRA;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2631,34 +2464,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b100;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2668,7 +2498,7 @@ module control_unit2 (
                         MemToReg = 3'b100;   ///
                         ShiftControl = 3'b000;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;   ///
                     end
@@ -2677,27 +2507,24 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_SLLV;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2707,34 +2534,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b001;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SLLV;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2744,34 +2568,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b010;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
                         
                         RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2781,7 +2602,7 @@ module control_unit2 (
                         MemToReg = 3'b100;   ///
                         ShiftControl = 3'b000;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;   ///
                     end
@@ -2790,27 +2611,24 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_SRAV;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2820,34 +2638,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b001;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRAV;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2857,34 +2672,31 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b100;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo =  1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2894,7 +2706,7 @@ module control_unit2 (
                         MemToReg = 3'b100;   ///
                         ShiftControl = 3'b000;   ///
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
                         Counter = 6'd0;   ///
                     end
                 end
@@ -2902,30 +2714,27 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b0;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b1;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0;
-                    LoWrite = 1'b0;
+                    LoadHi = 1'b0;
+                    LoadLo = 1'b0;
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b1;
                     LSControl = 1'b0;
 
                     RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b00;
                     LSControlSignal = 2'b00;
@@ -2936,7 +2745,7 @@ module control_unit2 (
                     MemToReg = 3'b000;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -2946,30 +2755,27 @@ module control_unit2 (
                         State = ST_SW;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0; //
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
+                        ALUSrB = 2'b01; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -2980,7 +2786,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -2988,30 +2794,27 @@ module control_unit2 (
                         State = ST_SW;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b11;
@@ -3022,7 +2825,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3030,30 +2833,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b1;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b11;
@@ -3064,7 +2864,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 0;
                     end
@@ -3075,30 +2875,27 @@ module control_unit2 (
                         State = ST_SB;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0; //
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
+                        ALUSrB = 2'b01; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3109,7 +2906,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3117,30 +2914,27 @@ module control_unit2 (
                         State = ST_SB;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b01;
@@ -3151,7 +2945,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3159,30 +2953,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b1;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b01;
@@ -3193,7 +2984,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 0;
                     end
@@ -3204,30 +2995,27 @@ module control_unit2 (
                         State = ST_SH;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0; //
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
+                        ALUSrB = 2'b01; //
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3238,7 +3026,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3246,30 +3034,27 @@ module control_unit2 (
                         State = ST_SH;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b10;
@@ -3280,7 +3065,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3288,30 +3073,27 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b1;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b1;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b10;
@@ -3322,7 +3104,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 0;
                     end
@@ -3334,30 +3116,27 @@ module control_unit2 (
                         State = ST_LW; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
+                        ALUSrB = 2'b01;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3368,7 +3147,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3376,30 +3155,27 @@ module control_unit2 (
                         State = ST_LW; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //MemRead
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b1;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b11;
@@ -3410,7 +3186,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3418,30 +3194,27 @@ module control_unit2 (
                         State = ST_LW; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b11;
@@ -3452,7 +3225,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3460,30 +3233,27 @@ module control_unit2 (
                         State = ST_COMMON; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b11;
@@ -3494,7 +3264,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -3504,30 +3274,27 @@ module control_unit2 (
                         State = ST_LB; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
+                        ALUSrB = 2'b01;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3538,7 +3305,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3546,30 +3313,27 @@ module control_unit2 (
                         State = ST_LB; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //MemRead
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b1;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b01;
@@ -3580,7 +3344,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3588,30 +3352,27 @@ module control_unit2 (
                         State = ST_LB; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b01;
@@ -3622,7 +3383,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3630,30 +3391,27 @@ module control_unit2 (
                         State = ST_COMMON; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b01;
@@ -3664,7 +3422,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -3674,30 +3432,27 @@ module control_unit2 (
                         State = ST_LH; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1;
+                        LoadALUOUT = 1'b1;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
+                        ALUSrB = 2'b01;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3708,7 +3463,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3716,30 +3471,27 @@ module control_unit2 (
                         State = ST_LH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //MemRead
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b1;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b10;
@@ -3750,7 +3502,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3758,30 +3510,27 @@ module control_unit2 (
                         State = ST_LH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b10;
@@ -3792,7 +3541,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3800,30 +3549,27 @@ module control_unit2 (
                         State = ST_COMMON; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b10;
@@ -3834,7 +3580,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -3844,30 +3590,27 @@ module control_unit2 (
                     State = ST_BREAK;
 
                     PCWrite = 1'b1;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
+                    PCWriteCond = 1'b0;
+                    MemControl = 1'b0;
+                    IRWrite = 1'b0;
                     RegWrite = 1'b0;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b0;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
+                    LoadA = 1'b0;
+                    LoadB = 1'b0;
+                    ALUSrA = 1'b0;
+                    LoadALUOUT = 1'b0;
+                    LoadMDR = 1'b0;
                     MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                    LoadHi = 1'b0; 
+                    LoadLo =  1'b0; 
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
+                    LoadEPC = 1'b0;
+                    InputShift = 1'b0;
+                    NumberShift = 1'b0;
                     LTout = 1'b0;
                     LSControl = 1'b0;
 
                     RegDST = 2'b00;
-                    muxAlu2Control = 2'b00;
+                    ALUSrB = 2'b00;
                     RegReadOne = 2'b00;
                     CondControl = 2'b00;
                     LSControlSignal = 2'b00;
@@ -3878,7 +3621,7 @@ module control_unit2 (
                     MemToReg = 3'b000;
                     ShiftControl = 3'b000;
 
-                    rst = 1'b0;
+                    rst_out = 1'b0;
 
                     Counter = 6'd0;
                 end
@@ -3888,30 +3631,27 @@ module control_unit2 (
                         State = ST_POP; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1; //
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1; //
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1; //
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1; //
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b01; //
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3922,7 +3662,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3932,30 +3672,27 @@ module control_unit2 (
                         State = ST_POP; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0; //MemRead
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b1;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -3966,7 +3703,7 @@ module control_unit2 (
                         MemToReg = 3'b101;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -3975,30 +3712,27 @@ module control_unit2 (
                         State = ST_POP; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1; //
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00; //
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4009,7 +3743,7 @@ module control_unit2 (
                         MemToReg = 3'b001; //
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -4018,29 +3752,26 @@ module control_unit2 (
                         State = ST_POP;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1; //
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1; //
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1; //
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1; //
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
+                        ALUSrB = 2'b11; //
                         RegReadOne = 2'b01; //
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4051,7 +3782,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1; //
                     end
@@ -4061,29 +3792,26 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1; //
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0; //
                         LSControl = 1'b0;
 
                         RegDST = 2'b10; //
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4094,7 +3822,7 @@ module control_unit2 (
                         MemToReg = 3'b000; //
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                     end
@@ -4104,30 +3832,27 @@ module control_unit2 (
                         State = ST_PUSH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1; //
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1; //
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1; //
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1; //
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
+                        ALUSrB = 2'b11; //
                         RegReadOne = 2'b01; //
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4138,7 +3863,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -4146,29 +3871,26 @@ module control_unit2 (
                         State = ST_PUSH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1; //
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0; //
                         LSControl = 1'b0;
 
                         RegDST = 2'b10; //
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4179,7 +3901,7 @@ module control_unit2 (
                         MemToReg = 3'b000; //
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -4188,29 +3910,26 @@ module control_unit2 (
                         State = ST_PUSH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0; //
-                        RegAWrite = 1'b1;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1; // 
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1; // 
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0; //
                         LSControl = 1'b0;
 
                         RegDST = 2'b00; //
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b01; //
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4221,7 +3940,7 @@ module control_unit2 (
                         MemToReg = 3'b000; //
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
@@ -4229,29 +3948,26 @@ module control_unit2 (
                         State = ST_SW;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1; //
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1; //
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b1; //
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b1; //
+                        LoadALUOUT = 1'b1; //
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
+                        ALUSrB = 2'b01; //
                         RegReadOne = 2'b01; //
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4262,7 +3978,7 @@ module control_unit2 (
                         MemToReg = 3'b000;
                         ShiftControl = 3'b000;
 
-                        rst = 1'b0;
+                        rst_out = 1'b0;
 
                         Counter = 6'd1;
                     end
@@ -4272,30 +3988,27 @@ module control_unit2 (
                         State = ST_RESET; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
+                        PCWriteCond = 1'b0;
+                        MemControl = 1'b0;
+                        IRWrite = 1'b0;
                         RegWrite = 1'b1; //
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b0;
+                        LoadA = 1'b0;
+                        LoadB = 1'b0;
+                        ALUSrA = 1'b0;
+                        LoadALUOUT = 1'b0;
+                        LoadMDR = 1'b0;
                         MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
+                        LoadHi = 1'b0;
+                        LoadLo = 1'b0;
     
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
+                        LoadEPC = 1'b0;
+                        InputShift = 1'b0;
+                        NumberShift = 1'b0;
                         LTout = 1'b0;
                         LSControl = 1'b0;
 
                         RegDST = 2'b10; //
-                        muxAlu2Control = 2'b00;
+                        ALUSrB = 2'b00;
                         RegReadOne = 2'b00;
                         CondControl = 2'b00;
                         LSControlSignal = 2'b00;
@@ -4306,7 +4019,7 @@ module control_unit2 (
                         MemToReg = 3'b111; //
                         ShiftControl = 3'b000;
                         
-                        rst = 1'b1;
+                        rst_out = 1'b1;
 
                         Counter = 6'd0;
                     end

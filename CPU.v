@@ -2,21 +2,9 @@ module CPU(
     input wire clk, 
     input wire reset
 ); 
-// flags 
-    wire ovf; //overflow
-    wire eq; 
-    wire gt; 
-    wire lt; 
-    wire zero; 
-    wire ng; //neg
-    wire zero_D; //divisão por zero 
-    wire IsBEQ;
-    wire IsBNE;
-    wire IsBGT;
-    wire IsBLE;
 
-// CONTROL WIRES 
-    // um bit
+    // CONTROL WIRES UM BIT
+    wire PCWrite;
     wire divControl; 
     wire multControl;
     wire muxAControl;
@@ -32,7 +20,6 @@ module CPU(
     wire AluOutWrite;
     wire HiWrite;
     wire LoWrite;
-    wire PCWrite;
     wire EPCWrite;
     wire LTWrite;
     wire ShiftRegWrite;
@@ -42,10 +29,27 @@ module CPU(
     wire MDRWrite;
     wire instructRegWrite;
 
+    // flags 
+    wire ovf; //overflow
+    wire eq; 
+    wire gt; 
+    wire lt; 
+    wire zero; 
+    wire ng; //neg
+    wire zero_D; //divisão por zero 
+    wire IsBEQ;
+    wire IsBNE;
+    wire IsBGT;
+    wire IsBLE;
+
+    IsBEQ = 1'b0;
+    IsBNE = 1'b0;
+    IsBGT = 1'b0;
+    IsBLE = 1'b0;
 
     // dois bits
-    wire [1:0] ALU1Control;
-    wire [1:0] ALU2Control;
+    wire [1:0] muxAlu1Control;
+    wire [1:0] muxAlu2Control;
     wire [1:0] muxShamtControl;
     wire [1:0] muxShiftInControl;
     wire [1:0] storeSel;
@@ -59,6 +63,14 @@ module CPU(
     wire [2:0] muxRegControl;
     wire [2:0] muxAddressControl;
     wire [2:0] shiftControl;
+
+    
+// INST. REG
+    wire [5:0] instruct31to26; //opcode
+    wire [4:0] instruct25to21; //rs
+    wire [4:0] instruct20to16; //rt
+    wire [15:0] immediate; //16
+    wire [25:0] inst25to0 //junção de rs, rt e opcode
 
 // WIRES DE CARREGAMENTO
     // wire de quatro bits
@@ -124,13 +136,6 @@ module CPU(
     wire [31:0] zeroToMuxPc;        // 0 que entra no muxPC
     wire [31:0] muxPcOut;           // Fio que sai do muxPC
     wire [31:0] epcOut;             // Fio que sai do registrador EPC
-
-// INST. REG
-    wire [5:0] instruct31to26; //opcode
-    wire [4:0] instruct25to21; //rs
-    wire [4:0] instruct20to16; //rt
-    wire [15:0] immediate; //16
-    wire [25:0] inst25to0 //junção de rs, rt e opcode
 
 //REGISTRADORES
 Registrador A( 
@@ -261,7 +266,7 @@ mux_ALU1 muxALU1(
     aOut,
     zeroToMuxAlu1,
     auxOut,
-    ALU1Control,
+    muxAlu1Control,
     muxAlu1Out    
 );
 
@@ -270,7 +275,7 @@ mux_ALU2 muxALU2(
     fourToMuxAlu2,
     signExtOut,
     sl32to32Out,
-    ALU2Control,
+    muxAlu2Control,
     muxAlu2Out
 );
 
@@ -317,7 +322,7 @@ mux_LO muxLO (
     muxLoOut
 );
 
-//mult e div
+//MULT E DIV
 mult multi(
     clk,
     reset,
@@ -387,7 +392,6 @@ SS StoreSize(
     storeSel,
     bOut,
     mdrOut,
-    exceptionControl,
     ssOut
 );
 
@@ -446,7 +450,69 @@ ula32 ULA(
 );
 
 unid_controle unidadecontrole(
-
+    clk, 
+    reset, 
+// CONTROL WIRES 
+    // um bit
+    PCWrite,
+    MemWrite,
+    instructRegWrite,
+    RegWrite,
+    RegAWrite,
+    RegBWrite,
+    AluOutWrite,
+    MDRWrite,
+    HiWrite,
+    LoWrite,
+    EPCWrite,
+    ShiftRegWrite,
+    divControl, 
+    multControl,
+    muxAControl,
+    muxBControl,
+    muxExtControl,
+    muxHiControl,
+    muxLoControl,
+    muxMemWrite,
+    MemRead,
+    concatControl,
+    LTWrite,
+    RegAuxWrite,
+    
+    // flags 
+    ovf, //overflow
+    eq,
+    gt, 
+    lt 
+    zero, 
+    ng,//neg
+    zero_D, //divisão por zero 
+    IsBEQ,
+    IsBNE,
+    IsBGT,
+    IsBLE,
+    
+    // dois bits
+    muxAlu1Control,
+    muxAlu2Control,
+    muxShamtControl,
+    muxShiftInControl,
+    storeSel,
+    loadSel,
+    exceptionControl,
+    
+    // três bits
+    ALUControl,
+    muxDataControl,
+    muxPCControl,
+    muxRegControl,
+    muxAddressControl,
+    shiftControl,
+    
+    //instruções
+    instruct31to26, //opcode
+    immediate[5:0], //16
+    inst25to0
 );
 
 

@@ -6,8 +6,8 @@ module div(
     input wire [31:0] bInput,
     output wire [31:0] HI,  // Quocient
     output wire [31:0] LO,  // Rest
-    output wire ok,         // = 1 when ready to get the result   
-    output wire err         // Divison by zero
+    output wire err,         // Divison by zero
+    output wire ok         // = 1 when ready to get the result   
 );  
 
     reg active;          // True if the divider is running  
