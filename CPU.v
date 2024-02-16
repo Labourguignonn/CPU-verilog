@@ -15,14 +15,11 @@ module CPU(
     wire muxMemWrite;
     wire MemWrite;
     wire MemRead;
-    wire concatControl;
     wire RegWrite;
     wire AluOutWrite;
     wire HiWrite;
     wire LoWrite;
     wire EPCWrite;
-    wire LTWrite;
-    wire ShiftRegWrite;
     wire RegAWrite;
     wire RegBWrite;
     wire RegAuxWrite;
@@ -37,15 +34,6 @@ module CPU(
     wire zero; 
     wire ng; //neg
     wire zero_D; //divisão por zero 
-    wire IsBEQ;
-    wire IsBNE;
-    wire IsBGT;
-    wire IsBLE;
-
-    IsBEQ = 1'b0;
-    IsBNE = 1'b0;
-    IsBGT = 1'b0;
-    IsBLE = 1'b0;
 
     // dois bits
     wire [1:0] muxAlu1Control;
@@ -130,7 +118,6 @@ module CPU(
     wire [31:0] code227toMuxData;   // Código 227 que entra no muxData
     wire [31:0] signExtOut;         // Fio que sai do sign extend de 16 para 32 bits
     wire [31:0] ltExtOut;           // Fio que sai do sign extend de 1 para 32 bits (antes de LT)
-    wire [31:0] ltOut;              // Fio que sai do registrador LT
     wire [31:0] zeroToMuxAlu1;      // 0 que entra no muxALU1
     wire [31:0] fourToMuxAlu2;      // 4 que entra no muxALU2
     wire [31:0] zeroToMuxPc;        // 0 que entra no muxPC
@@ -303,7 +290,7 @@ mux_data muxData(
     hiOut,
     loOut,
     shiftRegOut,
-    ltOut,
+    ltExtOut,
     muxDataControl,
     muxDataOut
 );
@@ -465,7 +452,6 @@ unid_controle unidadecontrole(
     HiWrite,
     LoWrite,
     EPCWrite,
-    ShiftRegWrite,
     divControl, 
     multControl,
     muxAControl,
@@ -475,8 +461,6 @@ unid_controle unidadecontrole(
     muxLoControl,
     muxMemWrite,
     MemRead,
-    concatControl,
-    LTWrite,
     RegAuxWrite,
     
     // dois bits
