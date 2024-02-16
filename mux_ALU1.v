@@ -10,7 +10,6 @@ module mux_ALU1(
     assign ALU1Out = (ALU1control == 2'b00) ? PCOut :
     (ALU1control == 2'b01) ? AOut :
     (ALU1control == 2'b10) ? zero :
-    (ALU1control == 2'b11) ? auxOut :
-    reset; 
+    auxOut; 
 
 endmodule

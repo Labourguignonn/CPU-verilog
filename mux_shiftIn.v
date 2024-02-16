@@ -7,8 +7,7 @@ module mux_shiftIn(input wire [31:0] AOut,
   
   assign shiftinOut = (shiftincontrol == 2'b00) ? AOut :
      (shiftincontrol == 2'b01) ? BOut :
-     (shiftincontrol == 2'b10) ? mdrOut :
-     reset;
+     (shiftincontrol == 2'b10) ? mdrOut;
   
   
 endmodule

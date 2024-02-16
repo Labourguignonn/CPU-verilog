@@ -18,7 +18,6 @@ module mux_data(
     (dataControl == 3'b100) ? HIout :
     (dataControl == 3'b101) ? LOout :
     (dataControl == 3'b110) ? shiftregout :
-    (dataControl == 3'b111) ? LTout :
-    reset; 
+    LTout;
 
 endmodule

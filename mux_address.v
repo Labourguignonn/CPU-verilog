@@ -10,8 +10,6 @@ module mux_address(input wire [31:0] PCOut, //00
     (addressControl == 2'b001) ? tft :
     (addressControl == 2'b010) ? tff :
     (addressControl == 2'b011) ? tfs :
-    (addressControl == 2'b100) ? ALU_Out:
-    reset; 
-  
+    (addressControl == 2'b100) ? ALU_Out;
   
 endmodule

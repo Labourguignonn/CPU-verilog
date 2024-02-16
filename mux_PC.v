@@ -13,7 +13,6 @@ module mux_PC(
      (muxPCcontrol == 3'b001) ? zero :
      (muxPCcontrol == 3'b010) ? ALUOut :
      (muxPCcontrol == 3'b011) ? concatOut :
-     (muxPCcontrol == 3'b100) ? ALUresult :
-     reset; 
+     ALUresult; 
 
 endmodule

@@ -11,7 +11,6 @@ module mux_ALU2(
     assign ALU2Out = (ALU2control == 2'b00) ? BOut :
      (ALU2control == 2'b01) ? quatro :
      (ALU2control == 2'b10) ? sign :
-     (ALU2control == 2'b11) ? shift :
-     reset; 
+     shift; 
 
 endmodule

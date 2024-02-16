@@ -7,8 +7,7 @@ module mux_shamt(input wire [4:0] fiftozero,
   
   assign shamtOut = (shamtcontrol == 2'b00) ? fiftozero :
      (shamtcontrol == 2'b01) ? BOut :
-     (shamtcontrol == 2'b10) ? twenfour :
-     reset;
+     (shamtcontrol == 2'b10) ? twenfour;
   
   
 endmodule

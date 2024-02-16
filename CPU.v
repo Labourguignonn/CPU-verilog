@@ -12,7 +12,7 @@ module CPU(
     wire muxExtControl;
     wire muxHiControl;
     wire muxLoControl;
-    wire muxMemWrite;
+    wire muxMemWriteControl;
     wire MemWrite;
     wire MemRead;
     wire RegWrite;
@@ -58,7 +58,7 @@ module CPU(
     wire [4:0] instruct25to21; //rs
     wire [4:0] instruct20to16; //rt
     wire [15:0] immediate; //16
-    wire [25:0] inst25to0 //junção de rs, rt e opcode
+    wire [25:0] inst25to0; //junção de rs, rt e opcode
 
 // WIRES DE CARREGAMENTO
     // wire de quatro bits
@@ -69,7 +69,7 @@ module CPU(
     wire [4:0] code31toReg;         // Código 31 que entra no muxReg
     wire [4:0] muxRegOut;           // Fio que sai do muxReg
     wire [4:0] muxShamtOut;         // Fio que sai do muxShamt
-    wire [4:0] num24toMuxShamt      // 24 que entra no muxShamt
+    wire [4:0] num24toMuxShamt;     // 24 que entra no muxShamt
     
     // wires de 16 bits
     wire [15:0] instruct15to0;      // Instruções [15:0] que saem do registrador de instruções
@@ -217,7 +217,7 @@ mux_address muxAdress(
 mux_memwrite muxMemWrite(
     ssOut, //in
     bOut, //in
-    muxMemWrite, //control
+    muxMemWriteControl, //control
     muxMemWriteOut //out
 );
 
@@ -419,8 +419,8 @@ Banco_reg Banco(
     instruct20to16, 
     muxRegOut,
     muxdataOut,
-    data1Out //saída do read data 1
-    data1Out // saída do read data 2 
+    readData1, //saída do read data 1
+    readData2 // saída do read data 2 
 );
 
 ula32 ULA( 
@@ -484,14 +484,10 @@ unid_controle unidadecontrole(
     ovf, //overflow
     eq,
     gt, 
-    lt 
+    lt,
     zero, 
     ng,//neg
     zero_D, //divisão por zero 
-    IsBEQ,
-    IsBNE,
-    IsBGT,
-    IsBLE,
     
     //instruções
     instruct31to26, //opcode

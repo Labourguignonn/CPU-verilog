@@ -12,7 +12,6 @@ module mux_reg(
     (RegControl == 3'b001) ? twentosix :
     (RegControl == 3'b010) ? dec29 :
     (RegControl == 3'b011) ? dec31 :
-    (RegControl == 3'b100) ? fiftozero :
-    reset; 
+    (RegControl == 3'b100) ? fiftozero;
 
 endmodule
