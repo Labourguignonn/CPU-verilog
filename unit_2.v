@@ -1,8 +1,8 @@
 module control_unit2 (
     input wire clk,
     input wire reset,
-    output reg PCWrite,
-    output reg PCWriteCond,
+    
+    output reg PCWrite, 
     output reg MemControl,
     output reg IRWrite,
     output reg RegWrite,
@@ -19,15 +19,6 @@ module control_unit2 (
     output reg LTout,
     output reg LSControl,
 
-    //flags
-    input wire Of,
-    input wire Ng,
-    input wire Zr,
-    input wire Eq,
-    input wire Gt,
-    input wire Lt,
-    input wire DivZero,
-
     //2 bits
     output reg [1:0] RegDST,
     output reg [1:0] ALUSrB,
@@ -42,6 +33,15 @@ module control_unit2 (
     output reg[2:0] PCSource,
     output reg[2:0] MemToReg,
     output reg[2:0] ShiftControl,
+
+    //flags
+    input wire Of,
+    input wire Ng,
+    input wire Zr,
+    input wire Eq,
+    input wire Gt,
+    input wire Lt,
+    input wire DivZero,
 
     //Instrucoes
     input wire [5:0] OPCode,
@@ -1189,7 +1189,6 @@ module control_unit2 (
                         begin
                             State = ST_OF;
                         end
-
                     end
                 end
                 ST_DIV: begin

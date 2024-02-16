@@ -6,8 +6,8 @@ module CPU(
     // CONTROL WIRES UM BIT
     wire PCWrite;
     wire divControl; 
-    wire multControl;
-    wire muxAControl;
+    wire multControl; 
+    wire muxAControl; 
     wire muxBControl;
     wire muxExtControl;
     wire muxHiControl;
@@ -479,19 +479,6 @@ unid_controle unidadecontrole(
     LTWrite,
     RegAuxWrite,
     
-    // flags 
-    ovf, //overflow
-    eq,
-    gt, 
-    lt 
-    zero, 
-    ng,//neg
-    zero_D, //divisão por zero 
-    IsBEQ,
-    IsBNE,
-    IsBGT,
-    IsBLE,
-    
     // dois bits
     muxAlu1Control,
     muxAlu2Control,
@@ -508,6 +495,19 @@ unid_controle unidadecontrole(
     muxRegControl,
     muxAddressControl,
     shiftControl,
+
+    // flags 
+    ovf, //overflow
+    eq,
+    gt, 
+    lt 
+    zero, 
+    ng,//neg
+    zero_D, //divisão por zero 
+    IsBEQ,
+    IsBNE,
+    IsBGT,
+    IsBLE,
     
     //instruções
     instruct31to26, //opcode

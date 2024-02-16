@@ -1,4 +1,4 @@
-module control_unit2 (
+module unid_controle (
 // OK   
     input wire clk,
     input wire reset,
@@ -27,19 +27,6 @@ module control_unit2 (
     output reg LTWrite,
     output reg RegAuxWrite,
 
-    //flags
-    input wire ovf,
-    input wire eq,
-    input wire gt,
-    input wire lt,
-    input wire zero,
-    input wire ng,
-    input wire zero_D,
-    input wire IsBEQ,
-    input wire IsBNE,
-    input wire IsBGT,
-    input wire IsBLE,
-
     //2 bits
     output reg [1:0] ALU1Control,
     output reg [1:0] ALU2Control,
@@ -56,6 +43,15 @@ module control_unit2 (
     output reg[2:0] muxRegControl,
     output reg[2:0] muxAddressControl,
     output reg[2:0] ShiftControl,
+
+    //flags
+    input wire ovf,
+    input wire eq,
+    input wire gt,
+    input wire lt,
+    input wire zero,
+    input wire ng,
+    input wire zero_D,
 
     //Instrucoes
     input wire [5:0] instruct31to26,
@@ -117,7 +113,9 @@ module control_unit2 (
 
     parameter ST_BREAK = 6'd32; //PENÚLTIMO ESTADO!
     parameter ST_RESET = 6'd33; //ÚLTIMO ESTADO!
-    parameter ST_OPN = 6'd38;
+    parameter ST_OPN = 6'd38; //opcode no existent 
+
+    
 
     //Opcode
     parameter RESET = 6'b111111;
@@ -202,23 +200,23 @@ module control_unit2 (
                 RegAuxWrite = 1'b0;
 
                 //dois bits
-                ALU1Control = 2'b00
-                ALU2Control = 2'b00
-                muxShamtControl = 2'b00
-                muxShiftInControl = 2'b00
-                storeSel = 2'b00
-                loadSel = 2'b00
-                exceptionControl = 2'b00
+                ALU1Control = 2'b00;
+                ALU2Control = 2'b00;
+                muxShamtControl = 2'b00;
+                muxShiftInControl = 2'b00;
+                storeSel = 2'b00;
+                loadSel = 2'b00;
+                exceptionControl = 2'b00;
 
                 //tres bits
-                ALUControl = 3'b000
-                muxDataControl = 3'b000
-                muxPCControl = 3'b000
+                ALUControl = 3'b000;
+                muxDataControl = 3'b000;
+                muxPCControl = 3'b100; //pode ser que seja 000
                 //qual o mux memtoreg -> ele deve estar com 111
-                muxRegControl = 3'b000
-                muxAddressControl = 3'b000
+                muxRegControl = 3'b011; //pode ser que seja 000
+                muxAddressControl = 3'b000;
                 ///
-                ShiftControl = 3'b000
+                ShiftControl = 3'b000;
 
                 rst = 1'b1;
                 Counter = 6'd0;
@@ -252,23 +250,21 @@ module control_unit2 (
                 RegAuxWrite = 1'b0;
 
                 //dois bits
-                ALU1Control = 2'b00
-                ALU2Control = 2'b00
-                muxShamtControl = 2'b00
-                muxShiftInControl = 2'b00
-                storeSel = 2'b00
-                loadSel = 2'b00
-                exceptionControl = 2'b00
+                ALU1Control = 2'b00;
+                ALU2Control = 2'b00;
+                muxShamtControl = 2'b00;
+                muxShiftInControl = 2'b00;
+                storeSel = 2'b00;
+                loadSel = 2'b00;
+                exceptionControl = 2'b00;
 
                 //tres bits
-                ALUControl = 3'b000
-                muxDataControl = 3'b000
-                muxPCControl = 3'b000
-                //qual o mux memtoreg -> ele deve estar com 111
-                muxRegControl = 3'b000
-                muxAddressControl = 3'b000
-                ///
-                ShiftControl = 3'b000
+                ALUControl = 3'b000;
+                muxDataControl = 3'b000; // pega 227 
+                muxPCControl = 3'b000;
+                muxRegControl = 3'b011; //pega o 31
+                muxAddressControl = 3'b000;
+                ShiftControl = 3'b000;
 
                 rst = 1'b0;
                 Counter = 6'd0;
@@ -285,7 +281,7 @@ module control_unit2 (
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0;
@@ -308,65 +304,69 @@ module control_unit2 (
                         RegAuxWrite = 1'b0;
 
                         //dois bits
-                        ALU1Control = 2'b00
-                        ALU2Control = 2'b00
-                        muxShamtControl = 2'b00
-                        muxShiftInControl = 2'b00
-                        storeSel = 2'b00
-                        loadSel = 2'b00
-                        exceptionControl = 2'b00
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b000
-                        muxDataControl = 3'b000
-                        muxPCControl = 3'b000
-                        //qual o mux memtoreg -> ele deve estar com 111
-                        muxRegControl = 3'b000
-                        muxAddressControl = 3'b000
-                        ///
-                        ShiftControl = 3'b000
+                        ALUControl = 3'b001; //SOMA
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd3) begin
                         //Nesse else o PC eh salvo
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b1; //escreve o resultado de PC+4 em PC
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b1;  
+                        instructRegWrite = 1'b1;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0; 
+                        AluOutWrite = 1'b0;
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //PC+4
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; //4 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001; //SOMA
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; //SOMA(PC+4)
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b100; //pode ser 000 -- precisa disso para passar a informação para PC
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -376,45 +376,53 @@ module control_unit2 (
                     else if(Counter == 6'd4) begin
                         //Nesse else acontece o estado de Decode
                         State = ST_COMMON;
-
-                        PCWrite = 1'b0; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b1;
                         RegBWrite = 1'b1;
-                        muxAlu1Control = 1'b0; //PC
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b1;
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b1;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b1; //pode ser 0 -- precisa disso por pegar informação do mux para pegar o immediate
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b10; //Immediate
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00; //PC
+                        ALU2Control = 2'b11; //Immediate(shift)
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001; //Soma
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; //SOMA
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
 
                         Counter = Counter + 1;
+
                     end
                     else if(Counter == 6'd5) begin
                         case(OPCode)
@@ -551,39 +559,46 @@ module control_unit2 (
 
                         endcase
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -595,39 +610,46 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_ADD;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -637,39 +659,46 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;  
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -687,36 +716,46 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_ADDI;
 
-                        PCWrite = 1'b0;   
-                        PCWriteCond     
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b1;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b10; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -726,39 +765,46 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b10; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -778,38 +824,45 @@ module control_unit2 (
                         State = ST_OPN;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b1; //
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b010; //
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -821,38 +874,45 @@ module control_unit2 (
                         State = ST_OPN;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b011; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -863,39 +923,46 @@ module control_unit2 (
                     begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b1;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b010; //
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -910,38 +977,45 @@ module control_unit2 (
                         State = ST_OF;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b1; //
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b010; //
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -953,38 +1027,45 @@ module control_unit2 (
                         State = ST_OF;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b011; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -995,39 +1076,46 @@ module control_unit2 (
                     begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b010; //
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1039,39 +1127,46 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_ADDIU;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b1;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b10; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001;
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b001;
+                        muxAddressControl = 3'b000; 
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1081,39 +1176,46 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b01;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b10;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;   
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b001;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1125,41 +1227,48 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_AND;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b011;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b011; 
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -1167,128 +1276,149 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b011;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;  
+                        //tres bits
+                        ALUControl = 3'b011; 
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
-                        Counter = 6'd0;
+                        Counter = Counter + 1;
                     end
                 end
                 ST_SUB: begin
                     if(Counter == 6'd0) begin
                         State = ST_SUB;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b010;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b000;  
-                        
-                        rst = 1'b0;
+                        //tres bits
+                        ALUControl = 3'b010;
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
+                        rst_out = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1;
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-
-                        IordD = 3'b000;
-                        ALUOp = 3'b010;  
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b010;
+                        muxDataControl = 3'b010;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
-                        rst = 1'b0;
+
+                        rst_out = 1'b0;
 
                         Counter = 6'd0;
                         
@@ -1296,47 +1426,54 @@ module control_unit2 (
                         begin
                             State = ST_OF;
                         end
-
                     end
                 end
                 ST_DIV: begin
                     if(Counter < 6'd33) begin
                         State = ST_DIV;
 
-                        PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;  
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b10;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b1;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000; 
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;  
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -1344,41 +1481,48 @@ module control_unit2 (
                     else if(Counter == 6'd33) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b10;
-                        HiWrite = 1'b1; 
-                        LoWrite =  1'b1;
-    
+                        HiWrite = 1'b1;
+                        LoWrite = 1'b1;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b1; //DESLIGAR SE N FUNCIONAR
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b1;
+                        muxLoControl = 1'b1;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000; 
-                        ShiftControl = 3'b000;  
-                        
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = 6'd0;
@@ -1395,38 +1539,45 @@ module control_unit2 (
                         State = ST_DIVZ;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0; //
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b1; //
+                        EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b11; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b010; //
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b001;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1438,38 +1589,45 @@ module control_unit2 (
                         State = ST_DIVZ;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b100; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1480,39 +1638,46 @@ module control_unit2 (
                     begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1; //
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b010; //
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b001; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1524,41 +1689,48 @@ module control_unit2 (
                     if(Counter < 6'd33) begin
                         State = ST_MULT;
 
-                        PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b01;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b1;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;  
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;  
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -1566,41 +1738,48 @@ module control_unit2 (
                     else if(Counter == 6'd33) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b0;  
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b01;
-                        HiWrite = 1'b1; 
-                        LoWrite =  1'b1;
-    
+                        HiWrite = 1'b1;
+                        LoWrite = 1'b1;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b1;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;   
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;   
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = 6'd0;
@@ -1610,39 +1789,46 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_MFHI;
 
-                        PCWrite = 1'b0; 
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0; 
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;   
-                        MemToReg = 3'b010;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b100;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1652,39 +1838,46 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b1;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;  
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
+                        LoWrite = 1'b0;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;  
-                        MemToReg = 3'b010;
+                        //tres bits
+                        ALUControl = 3'b001;
+                        muxDataControl = 3'b1000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
@@ -1696,41 +1889,48 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_MFLO;
 
-                        PCWrite = 1'b0;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'00; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;  
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;  
-                        MemToReg = 3'b011;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'101;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -1738,41 +1938,48 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1;   
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b1;
                         MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;   
+                        instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
-                        RegAWrite = 1'b0;   
-                        RegBWrite = 1'b0;   
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
-    
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;  
-                        muxAlu2Control = 2'b00;   
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;  
-                        MemToReg = 3'b011;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b101;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b100;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = 6'd0;
@@ -1783,38 +1990,45 @@ module control_unit2 (
                         State = ST_JR; 
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
-    
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1825,38 +2039,45 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
-                        HiWrite = 1'b0; 
-                        LoWrite =  1'b0; 
-    
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b011;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b010;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1869,38 +2090,45 @@ module control_unit2 (
                         State = ST_RTE;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b100;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1911,38 +2139,45 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b1;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
                         EPCWrite = 1'b0;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b100;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b001;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1952,41 +2187,51 @@ module control_unit2 (
                 end
                 ST_BNE: begin
                     State = ST_COMMON;
+                        
+                        if(zero != 1) begin
+                         PCWrite = 1'b0;   
+                        end
+                        
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                    PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                    IsBNE = 1'b1;
-                    IsBGT = 1'b0;
-                    IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
-                    RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
-                    MultDiv = 2'b00;
-                    HiWrite = 1'b0; 
-                    LoWrite =  1'b0; 
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
-                    LTout = 1'b0;
-                    LSControl = 1'b0;
-
-                    RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
-                    RegReadOne = 2'b00;
-                    CondControl = 2'b00;
-                    LSControlSignal = 2'b00;
-                    
-                    IordD = 3'b000;
-                    ALUOp = 3'b111;
-                    PCSource = 3'b011;
-                    MemToReg = 3'b011;
-                    ShiftControl = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b111; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b010;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
 
                     rst = 1'b0;
 
@@ -2122,38 +2367,45 @@ module control_unit2 (
                     State = ST_COMMON;
 
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                     MemWrite = 1'b0;
                     instructRegWrite = 1'b0;
-                    RegWrite = 1'b1;
+                    RegWrite = 1'b0;
                     RegAWrite = 1'b0;
                     RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
+                    AluOutWrite = 1'b0; 
                     MDRWrite = 1'b0;
-                    MultDiv = 2'b00;
                     HiWrite = 1'b0;
                     LoWrite = 1'b0;
-
-                    EPCWrite = 1'b0;
+                    EPCWrite = 1'b1;
                     ShiftRegWrite = 1'b0;
-                    
-                    LTout = 1'b1;
-                    LSControl = 1'b0;
+                    divControl = 1'b0;
+                    multControl = 1'b0;
+                    muxAControl = 1'b0;
+                    muxBControl = 1'b0;
+                    muxExtControl = 1'b0;
+                    muxHiControl = 1'b0;
+                    muxLoControl = 1'b0;
+                    muxMemWrite = 1'b0;
+                    MemRead = 1'b0;
+                    concatControl = 1'b0;
+                    LTWrite = 1'b0;
+                    RegAuxWrite = 1'b0;
 
-                    RegDST = 2'b00;
-                    muxAlu2Control = 2'b01;
-                    RegReadOne = 2'b00;
-                    CondControl = 2'b00;
-                    LSControlSignal = 2'b00;
-                    
-                    IordD = 3'b000;
-                    ALUOp = 3'b111;
-                    PCSource = 3'b000;
-                    MemToReg = 3'b000;
+                    //dois bits
+                    ALU1Control = 2'b00;
+                    ALU2Control = 2'b01;
+                    muxShamtControl = 2'b00;
+                    muxShiftInControl = 2'b00;
+                    storeSel = 2'b00;
+                    loadSel = 2'b00;
+                    exceptionControl = 2'b00;
+
+                    //tres bits
+                    ALUControl = 3'b000;
+                    muxDataControl = 3'b000;
+                    muxPCControl = 3'b000;
+                    muxRegControl = 3'b000;
+                    muxAddressControl = 3'b000;
                     ShiftControl = 3'b000;
 
                     rst = 1'b0;
@@ -2162,40 +2414,46 @@ module control_unit2 (
                 end
                 ST_LUI: begin
                     State = ST_COMMON;
-
                     PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                     MemWrite = 1'b0;
                     instructRegWrite = 1'b0;
-                    RegWrite = 1'b1;
+                    RegWrite = 1'b0;
                     RegAWrite = 1'b0;
                     RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b0;
-                    RegAWriteLUOUT = 1'b0;
+                    AluOutWrite = 1'b0; 
                     MDRWrite = 1'b0;
-                    MultDiv = 2'b00;
                     HiWrite = 1'b0;
                     LoWrite = 1'b0;
-
-                    EPCWrite = 1'b0;
+                    EPCWrite = 1'b1;
                     ShiftRegWrite = 1'b0;
-                    
-                    LTout = 1'b0;
-                    LSControl = 1'b0;
+                    divControl = 1'b0;
+                    multControl = 1'b0;
+                    muxAControl = 1'b0;
+                    muxBControl = 1'b0;
+                    muxExtControl = 1'b0;
+                    muxHiControl = 1'b0;
+                    muxLoControl = 1'b0;
+                    muxMemWrite = 1'b0;
+                    MemRead = 1'b0;
+                    concatControl = 1'b0;
+                    LTWrite = 1'b0;
+                    RegAuxWrite = 1'b0;
 
-                    RegDST = 2'b00;
-                    muxAlu2Control = 2'b00;
-                    RegReadOne = 2'b00;
-                    CondControl = 2'b00;
-                    LSControlSignal = 2'b00;
+                    //dois bits
+                    ALU1Control = 2'b00;
+                    ALU2Control = 2'b01;
+                    muxShamtControl = 2'b00;
+                    muxShiftInControl = 2'b00;
+                    storeSel = 2'b00;
+                    loadSel = 2'b00;
+                    exceptionControl = 2'b00;
 
-                    IordD = 3'b000;
-                    ALUOp = 3'b000;
-                    PCSource = 3'b000;
-                    MemToReg = 3'b110;
+                    //tres bits
+                    ALUControl = 3'b000;
+                    muxDataControl = 3'b000;
+                    muxPCControl = 3'b000;
+                    muxRegControl = 3'b000;
+                    muxAddressControl = 3'b000;
                     ShiftControl = 3'b000;
                         
                     rst = 1'b0;
@@ -2206,39 +2464,46 @@ module control_unit2 (
                     if(Counter == 6'd0) begin
                         State = ST_J;
 
-                        PCWrite = 1'b1; //segundo
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b001; //primeiro
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
                             
                         rst = 1'b0;
@@ -2248,83 +2513,99 @@ module control_unit2 (
                     else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
-                        PCWrite = 1'b1; //segundo
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b001; //primeiro
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                            
+
                         rst = 1'b0;
 
                         Counter = 6'd0;
                     end
                 end
+                //ADICIONAR SRAM
+
                 ST_JAL: begin
                     if(Counter == 6'd0) begin
                         State = ST_JAL;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -2335,38 +2616,45 @@ module control_unit2 (
                         State = ST_J;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b11;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00
+                        storeSel = 2'b00;
+                        loadSel = 2'b00
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -2413,187 +2701,247 @@ module control_unit2 (
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SLL;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;   ///
-                           ///
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b010;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
                         
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
-                        PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
 
-                        RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
-                        
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b100;   ///
-                        ShiftControl = 3'b000;   ///
-                        
-                        rst = 1'b0;
-
-                        Counter = 6'd0;   ///
-                    end
-                end
-                ST_SRL: begin
-                    if(Counter == 6'd0) begin
-                        State = ST_SRL;
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b1;   ///
-                        NumberShift = 1'b1;   ///
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b001;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
+                        rst = 1'b0;
+
+                        Counter = 6'd0;   
+                    end
+                end
+                ST_SRL: begin
+                    if(Counter == 6'd0) begin
+                        State = ST_SRL;
+
+                        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
+
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRL;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;   ///
-                           ///
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b011;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b100;   ///
-                        ShiftControl = 3'b000;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
                         
                         Counter = 6'd0;   ///
@@ -2602,111 +2950,147 @@ module control_unit2 (
                 ST_SRA: begin
                     if(Counter == 6'd0) begin
                         State = ST_SRA;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b1;   ///
-                        NumberShift = 1'b1;   ///
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b001;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRA;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b100;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000
+                        muxPCControl = 3'b000
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b100;   ///
-                        ShiftControl = 3'b000;   ///
-                        
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         rst = 1'b0;
 
                         Counter = 6'd0;   ///
@@ -2715,36 +3099,49 @@ module control_unit2 (
                 ST_SLLV: begin
                     if(Counter == 6'd0) begin
                         State = ST_SLLV;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b001;   ///
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -2752,36 +3149,49 @@ module control_unit2 (
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SLLV;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b010;   ///
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -2789,36 +3199,48 @@ module control_unit2 (
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
-                        
-                        RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b100;   ///
-                        ShiftControl = 3'b000;   ///
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -2828,36 +3250,49 @@ module control_unit2 (
                 ST_SRAV: begin
                     if(Counter == 6'd0) begin
                         State = ST_SRAV;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b001;   ///
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -2865,36 +3300,49 @@ module control_unit2 (
                     end
                     else if(Counter == 6'd1) begin
                         State = ST_SRAV;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b100;   ///
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -2902,36 +3350,49 @@ module control_unit2 (
                     end
                     else if(Counter == 6'd2) begin
                         State = ST_COMMON;
+
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
-                        LoWrite =  1'b0;
-    
-                        EPCWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b01;   ///
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b000;
-                        MemToReg = 3'b100;   ///
-                        ShiftControl = 3'b000;   ///
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
                         Counter = 6'd0;   ///
@@ -2940,40 +3401,47 @@ module control_unit2 (
                 ST_SLT: begin
                     State = ST_COMMON;
 
-                    PCWrite = 1'b0;
-                    IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                    MemWrite = 1'b0;
-                    instructRegWrite = 1'b0;
-                    RegWrite = 1'b1;
-                    RegAWrite = 1'b0;
-                    RegBWrite = 1'b0;
-                    muxAlu1Control = 1'b1;
-                    RegAWriteLUOUT = 1'b0;
-                    MDRWrite = 1'b0;
-                    MultDiv = 2'b00;
-                    HiWrite = 1'b0;
-                    LoWrite = 1'b0;
+                        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b1;
+                        ShiftRegWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                    EPCWrite = 1'b0;
-                    ShiftRegWrite = 1'b0;
-                    
-                    LTout = 1'b1;
-                    LSControl = 1'b0;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                    RegDST = 2'b01;
-                    muxAlu2Control = 2'b00;
-                    RegReadOne = 2'b00;
-                    CondControl = 2'b00;
-                    LSControlSignal = 2'b00;
-                    
-                    IordD = 3'b000;
-                    ALUOp = 3'b111;
-                    PCSource = 3'b000;
-                    MemToReg = 3'b000;
-                    ShiftControl = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
 
                     rst = 1'b0;
 
@@ -2985,39 +3453,47 @@ module control_unit2 (
                         State = ST_SW;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
-                        MultDiv = 2'b00;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000
+
                         
                         rst = 1'b0;
 
@@ -3027,40 +3503,47 @@ module control_unit2 (
                         State = ST_SW;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b11;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -3069,39 +3552,48 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b11;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3114,39 +3606,48 @@ module control_unit2 (
                         State = ST_SB;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
-                        MultDiv = 2'b00;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3156,39 +3657,48 @@ module control_unit2 (
                         State = ST_SB;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b01;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3198,39 +3708,48 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b01;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+ 
                         
                         rst = 1'b0;
 
@@ -3243,39 +3762,47 @@ module control_unit2 (
                         State = ST_SH;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1; //
-                        RegAWriteLUOUT = 1'b1;
-                        MDRWrite = 1'b0; //
-                        MultDiv = 2'b00;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01; //
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -3285,39 +3812,48 @@ module control_unit2 (
                         State = ST_SH;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b10;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3327,39 +3863,48 @@ module control_unit2 (
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b1;
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b1;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b10;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001; //
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3373,80 +3918,45 @@ module control_unit2 (
                         State = ST_LW; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
-                        ShiftControl = 3'b000;
-                        
-                        rst = 1'b0;
-
-                        Counter = Counter + 1;
-                    end
-                    else if (Counter == 6'd1 || Counter == 6'd2 || Counter == 6'd3) begin
-                        State = ST_LW; //
-
-                        PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
-                        instructRegWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
-                        MultDiv = 2'b00;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
-                        ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
-
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b11;
-
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
@@ -3454,84 +3964,101 @@ module control_unit2 (
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd4) begin
-                        State = ST_LW; //
+                        State = ST_LW; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b11;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+ 
                         
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd5) begin
-                        State = ST_COMMON; //
+                        State = ST_COMMON; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b11;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
@@ -3543,40 +4070,48 @@ module control_unit2 (
                         State = ST_LB; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -3585,39 +4120,48 @@ module control_unit2 (
                         State = ST_LB; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
-                        MultDiv = 2'b00;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b01;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3627,40 +4171,48 @@ module control_unit2 (
                         State = ST_LB; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b01;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -3669,40 +4221,47 @@ module control_unit2 (
                         State = ST_COMMON; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b01;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
                         rst = 1'b0;
 
                         Counter = 6'd0;
@@ -3713,82 +4272,99 @@ module control_unit2 (
                         State = ST_LH; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b1;
-                        RegAWriteLUOUT = 1'b1;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b01;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b00;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b000;
-                        ALUOp = 3'b001;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b000;
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd1 || Counter == 6'd2 || Counter == 6'd3) begin
-                        State = ST_LH; //
+                        State = ST_LH; 
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
-                        MemWrite = 1'b0; //MemRead
+                        MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
-                        MDRWrite = 1'b1;
-                        MultDiv = 2'b00;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b10;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
-                        
+
+
+
                         rst = 1'b0;
 
                         Counter = Counter + 1;
@@ -3797,39 +4373,48 @@ module control_unit2 (
                         State = ST_LH; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b10;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
+
                         
                         rst = 1'b0;
 
@@ -3839,39 +4424,47 @@ module control_unit2 (
                         State = ST_COMMON; //
 
                         PCWrite = 1'b0;
-                        IsBEQ = 1'b0;
-                        IsBNE = 1'b0;
-                        IsBGT = 1'b0;
-                        IsBLE = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
+                        RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        muxAlu1Control = 1'b0;
-                        RegAWriteLUOUT = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
-                        MultDiv = 2'b00;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-    
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         ShiftRegWrite = 1'b0;
-                        
-                        LTout = 1'b0;
-                        LSControl = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        MemRead = 1'b0;
+                        concatControl = 1'b0;
+                        LTWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
 
-                        RegDST = 2'b00;
-                        muxAlu2Control = 2'b00;
-                        RegReadOne = 2'b00;
-                        CondControl = 2'b00;
-                        LSControlSignal = 2'b10;
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01 ;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
-                        IordD = 3'b001;
-                        ALUOp = 3'b000;
-                        PCSource = 3'b000;
-                        MemToReg = 3'b101;
+                        //tres bits
+                        ALUControl = 3'b000 ;
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
+
                         
                         rst = 1'b0;
 
