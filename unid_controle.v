@@ -2382,18 +2382,18 @@ module unid_controle (
                     multControl = 1'b0;
                     muxAControl = 1'b0;
                     muxBControl = 1'b0;
-                    muxExtControl = 1'b0;
+                    muxExtControl = 1'b1;
                     muxHiControl = 1'b0;
                     muxLoControl = 1'b0;
                     muxMemWrite = 1'b0;
                     MemRead = 1'b0;
                     concatControl = 1'b0;
-                    LTWrite = 1'b0;
+                    LTWrite = 1'b1; // CASO DÊ ERRADO VER ISSO
                     RegAuxWrite = 1'b0;
 
                     //dois bits
-                    ALU1Control = 2'b00;
-                    ALU2Control = 2'b01;
+                    ALU1Control = 2'b01;
+                    ALU2Control = 2'b11;
                     muxShamtControl = 2'b00;
                     muxShiftInControl = 2'b00;
                     storeSel = 2'b00;
