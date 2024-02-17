@@ -285,8 +285,8 @@ mux_shiftIn muxShiftIn(
 );
 
 mux_shamt muxShamt(
-    instruct15to0[4:0],
-    bOut[4:0],
+    instruct15to0[10:6],
+    bOut,
     num24toMuxShamt,
     muxShamtControl,
     muxShamtOut
