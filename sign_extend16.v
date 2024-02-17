@@ -1,8 +1,8 @@
-//ANALISAR 
+//ANALISAR (OK)
 module sign_extend16(input wire [15:0] immediate,
                      output wire [31:0] extend);
-  
-  assign extend = {16{immediate[31]}, immediate};
+  //ver qual o erro 
+  assign extend = {{16{1'b0}}, immediate};
   
   
 endmodule

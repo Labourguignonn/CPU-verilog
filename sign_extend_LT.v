@@ -1,8 +1,8 @@
 
 module sign_extend_LT(input wire immediate,
                      output wire [31:0] extend);
-  
-  assign extend = {31{'0'}, immediate};
+  // ver qual o erro 
+assign extend = {{31{1'b0}}, immediate};
   
   
 endmodule

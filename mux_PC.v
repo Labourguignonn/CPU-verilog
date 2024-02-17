@@ -1,4 +1,4 @@
-module mux_PC( 
+module mux_pc( 
     input wire [31:0] EPCOut, 
     input wire [31:0] zero, 
     input wire [31:0] ALUOut, 

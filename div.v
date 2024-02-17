@@ -18,7 +18,7 @@ module div(
 
     // Calculate the current digit
     wire [32:0] sub = {mod[30:0], result[31]} - divisor;  
-    assign err = !BOut;
+    assign err = !LO; //BOut
     // Send the results to our master  
     assign HI = result;
     assign LO = mod;

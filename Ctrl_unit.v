@@ -280,13 +280,13 @@ always @(posedge clk) begin
                 else if (counter == 3'b100) begin
                     estado = FETCH_DECODE_ST;
 
-                    PC_write = 1'b0;       //
+                    PC_write = 1'b0;       
                     MEM_write = 1'b0;
-                    IR_write = 1'b0;       //
-                    Regwrite = 1'b0;       //
-                    A_write = 1'b1;        //
-                    B_write = 1'b1;        //
-                    Alu_control = 3'b001;  //
+                    IR_write = 1'b0;      
+                    Regwrite = 1'b0;       
+                    A_write = 1'b1;        
+                    B_write = 1'b1;        
+                    Alu_control = 3'b001; 
                     ALUOutCtrl = 1'b1;
                     aluSourceA_control = 1'b0;
                     aluSourceB_control = 2'b11;
@@ -1387,7 +1387,7 @@ always @(posedge clk) begin
                     MDR_Write = 1'b0;
                     ShiftAmt = 1'b0;
                     ShiftSrc = 1'b0;
-                    ShiftControl = 3'b010;
+                    ShiftControl = 3'b100;
                     ExceptionControl = 2'b00;
                     ExceptionControl2 = 2'b00;
                     EPC_Write = 1'b0;
@@ -1533,21 +1533,21 @@ always @(posedge clk) begin
             JR_ST: begin
                 estado = FETCH_DECODE_ST;
 
-                PC_write = 1'b1;              //
+                PC_write = 1'b1;              
                 MEM_write = 1'b0;
                 IR_write = 1'b0;
                 Regwrite = 1'b0;
                 A_write = 1'b0;
                 B_write = 1'b0;
-                Alu_control = 3'b000;                 //
+                Alu_control = 3'b000;                
                 ALUOutCtrl = 1'b0;
-                aluSourceA_control = 1'b1;           //
+                aluSourceA_control = 1'b1;         
                 aluSourceB_control = 2'b00;
                 HIWrite = 1'b0;
                 LOWrite = 1'b0;
                 mux_toRegs_control = 2'b00;
                 srcData_control = 4'b0000;
-                pcSource_control = 3'b000;          //
+                pcSource_control = 3'b000;         
                 mux_IorD_control = 2'b00;
                 controlSS = 2'b00;
                 LScontrol = 2'b00;
@@ -1594,6 +1594,7 @@ always @(posedge clk) begin
 
                     counter = counter + 1;
                 end
+                //eq =1 
                 else if (counter == 3'b001) begin
                     estado = FETCH_DECODE_ST;
 
