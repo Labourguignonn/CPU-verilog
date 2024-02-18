@@ -14,7 +14,6 @@ module CPU(
     wire muxLoControl;
     wire muxMemWriteControl;
     wire MemWrite;
-    wire MemRead;
     wire RegWrite;
     wire AluOutWrite;
     wire HiWrite;
@@ -57,8 +56,11 @@ module CPU(
     wire [5:0] instruct31to26; //opcode
     wire [4:0] instruct25to21; //rs
     wire [4:0] instruct20to16; //rt
+    wire [15:0] instruct15to0; // Instruções [15:0] que saem do registrador de instruções
     wire [4:0] instruct15to11; //rd
     wire [25:0] instruct25to0; //junção de rs, rt e opcode
+    assign instruct25to0 = {instruct25to21, instruct20to16, instruct15to0};
+    assign instruct15to11 = instruct15to0[15:11];
 
 // WIRES DE CARREGAMENTO
     // wire de quatro bits
@@ -72,10 +74,7 @@ module CPU(
     wire [4:0] num24toMuxShamt = 5'd24;     // 24 que entra no muxShamt
     
     // wires de 16 bits
-    wire [15:0] instruct15to0;              // Instruções [15:0] que saem do registrador de instruções
     wire [15:0] muxExtOut;                  // Fio que sai do muxExtend
-
-    assign instruct15to11 = instruct15to0[15:11];
    
     // wire de 28 bits
     wire [27:0] sl26to28Out;                // Fio que sai do shift left de 26 para 28 bits
@@ -98,7 +97,6 @@ module CPU(
     wire [31:0] aOut;                       // Fio que sai do registrador A
     wire [31:0] muxBOut;                    // Fio que sai do muxB
     wire [31:0] bOut;                       // Fio que sai do registrador B
-    //wire [31:0] auxOut;                     // Fio que sai do registrador Aux
     wire [31:0] muxAlu1Out;                 // Fio que sai do muxALU1
     wire [31:0] muxAlu2Out;                 // Fio que sai do muxALU2
     wire [31:0] muxShiftInOut;              // Fio que sai do muxShiftIn
@@ -190,14 +188,6 @@ Registrador ALUOUT(
     aluResult, //saída da ULA
     aluOut
 );
-
-//Registrador Aux( 
- //   clk, 
-  //  reset, 
- //   RegAuxWrite,
-  //  muxAOut, 
-  //  auxOut
-//);
 
 //MUX's
 mux_A muxA( 
@@ -469,7 +459,6 @@ unid_controle unidadecontrole(
     muxHiControl,
     muxLoControl,
     muxMemWriteControl,
-    MemRead,
     //RegAuxWrite,
     
     // dois bits

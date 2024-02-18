@@ -2,11 +2,8 @@
 
 module shift_left26to28(
     input wire [25:0] twentyfive, //entrada de 26 bits
-    output wire [27:0] shiftLeftPCOut //saída de 28 bits
+    output wire [27:0] shiftLeftOut //saída de 28 bits
 );
-    wire [27:0] aux;
-    assign aux = {{2{1'b0}}, twentyfive};
-
-    assign shiftLeftOut = aux << 2; 
+    assign shiftLeftOut = {twentyfive, {2{1'b0}}};
     
 endmodule
