@@ -22,7 +22,7 @@ module CPU(
     wire EPCWrite;
     wire RegAWrite;
     wire RegBWrite;
-    wire RegAuxWrite;
+    //wire RegAuxWrite;
     wire MDRWrite;
     wire instructRegWrite;
 
@@ -98,7 +98,7 @@ module CPU(
     wire [31:0] aOut;                       // Fio que sai do registrador A
     wire [31:0] muxBOut;                    // Fio que sai do muxB
     wire [31:0] bOut;                       // Fio que sai do registrador B
-    wire [31:0] auxOut;                     // Fio que sai do registrador Aux
+    //wire [31:0] auxOut;                     // Fio que sai do registrador Aux
     wire [31:0] muxAlu1Out;                 // Fio que sai do muxALU1
     wire [31:0] muxAlu2Out;                 // Fio que sai do muxALU2
     wire [31:0] muxShiftInOut;              // Fio que sai do muxShiftIn
@@ -191,13 +191,13 @@ Registrador ALUOUT(
     aluOut
 );
 
-Registrador Aux( 
-    clk, 
-    reset, 
-    RegAuxWrite,
-    muxAOut, 
-    auxOut
-);
+//Registrador Aux( 
+ //   clk, 
+  //  reset, 
+ //   RegAuxWrite,
+  //  muxAOut, 
+  //  auxOut
+//);
 
 //MUX's
 mux_A muxA( 
@@ -233,7 +233,7 @@ mux_memwrite muxMemWrite(
 
 mux_pc muxPC( 
     epcOut, //in 
-    zeroToMuxPc, //in 
+    ls32Out, //in 
     aluOut, // in
     concatOut, // in 
     aluResult, // in
@@ -262,7 +262,6 @@ mux_ALU1 muxALU1(
     pcOut,
     aOut,
     zeroToMuxAlu1,
-    auxOut,
     muxAlu1Control,
     muxAlu1Out    
 );
@@ -471,7 +470,7 @@ unid_controle unidadecontrole(
     muxLoControl,
     muxMemWriteControl,
     MemRead,
-    RegAuxWrite,
+    //RegAuxWrite,
     
     // dois bits
     muxAlu1Control,

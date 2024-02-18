@@ -22,7 +22,6 @@ module unid_controle (
     output reg muxLoControl,
     output reg muxMemWrite,
     output reg MemRead,
-    output reg RegAuxWrite,
 
     //2 bits
     output reg [1:0] ALU1Control,
@@ -191,9 +190,6 @@ module unid_controle (
                 muxHiControl = 1'b0;
                 muxLoControl = 1'b0;
                 muxMemWrite = 1'b0;
-                MemRead = 1'b0;
-
-                RegAuxWrite = 1'b0;
 
                 //dois bits
                 ALU1Control = 2'b00;
@@ -207,13 +203,12 @@ module unid_controle (
                 //tres bits
                 ALUControl = 3'b000;
                 muxDataControl = 3'b000;
-                muxPCControl = 3'b100; //pode ser que seja 000
-                muxRegControl = 3'b010; //pode ser que seja 000
+                muxPCControl = 3'b100; 
+                muxRegControl = 3'b010; 
                 muxAddressControl = 3'b000;
-                ///
                 ShiftControl = 3'b000;
 
-               // rst = 1'b1; 
+                rst = 1'b1; 
                 Counter = 6'd0;
             end
             else begin
@@ -238,9 +233,7 @@ module unid_controle (
                 muxExtControl = 1'b0;
                 muxHiControl = 1'b0;
                 muxLoControl = 1'b0;
-                muxMemWrite = 1'b0;
-                MemRead = 1'b0;
-                RegAuxWrite = 1'b0;
+                muxMemWrite = 1'b0;               
 
                 //dois bits
                 ALU1Control = 2'b00;
@@ -267,7 +260,7 @@ module unid_controle (
             case(State)
                 ST_COMMON: begin
                     if (Counter == 6'd0 || Counter == 6'd1 || Counter == 6'd2) begin
-                        //Nesse if acontece parte do estado de busca e waiting
+                        //Busca e waiting
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
@@ -289,8 +282,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -313,7 +304,7 @@ module unid_controle (
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd3) begin
-                        //Nesse else o PC eh salvo
+                        //Salvar PC
                         State = ST_COMMON;
 
                         PCWrite = 1'b1; //escreve o resultado de PC+4 em PC
@@ -335,8 +326,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -356,7 +345,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd4) begin
@@ -378,12 +366,10 @@ module unid_controle (
                         multControl = 1'b0;
                         muxAControl = 1'b1;
                         muxBControl = 1'b0;
-                        muxExtControl = 1'b1; //pode ser 0 -- precisa disso por pegar informação do mux para pegar o immediate
+                        muxExtControl = 1'b1; 
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00; //PC
@@ -403,7 +389,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end
@@ -462,6 +447,8 @@ module unid_controle (
                                     XCHG: begin
                                         State = ST_XCHG;
                                     end
+                                    default:
+                                        State = ST_OPN;
                                 endcase
                             end
                             
@@ -561,8 +548,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -582,7 +567,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
                     end
                 end
@@ -609,9 +593,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00;
@@ -630,7 +612,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
@@ -655,9 +636,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+            
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
@@ -676,14 +655,12 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
 
                         if (ovf == 1'b1) 
                         begin
                             State = ST_OF;
                         end
-
                     end
                 end
                 ST_ADDI: begin
@@ -709,9 +686,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                    
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10; 
@@ -730,7 +705,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
@@ -755,8 +729,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -776,14 +748,12 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 3'b000;
 
                         if (ovf == 1'b1) 
                         begin
                             State = ST_OF;
                         end
-
                     end
                 end
                 ST_OPN: begin
@@ -810,12 +780,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
-                        ALU2Control = 2'b01; 
+                        ALU2Control = 2'b10; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -823,15 +791,14 @@ module unid_controle (
                         exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b000;
+                        ALUControl = 3'b010;
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end else if (Counter == 6'd1  || Counter == 6'd2) 
@@ -848,7 +815,7 @@ module unid_controle (
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-                        EPCWrite = 1'b1;
+                        EPCWrite = 1'b0;
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b0;
@@ -857,12 +824,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
-                        ALU2Control = 2'b01; 
+                        ALU2Control = 2'b00; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -873,15 +838,57 @@ module unid_controle (
                         ALUControl = 3'b000;
                         muxDataControl = 3'b000;
                         muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
-                        muxAddressControl = 3'b100;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b001;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end else if (Counter == 6'd3)
+                    begin
+                        State = ST_OPN;
+
+                        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b1;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
+                        rst = 1'b0;
+                        Counter = Counter + 1;
+                    end else if (Counter == 6'd4)
                     begin
                         State = ST_COMMON;
 
@@ -895,7 +902,7 @@ module unid_controle (
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-                        EPCWrite = 1'b1;
+                        EPCWrite = 1'b0;
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b0;
@@ -904,12 +911,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
-                        ALU2Control = 2'b01; 
+                        ALU2Control = 2'b00;
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -919,13 +924,12 @@ module unid_controle (
                         //tres bits
                         ALUControl = 3'b000; 
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxPCControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
                     end
                 end
@@ -954,9 +958,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b01; 
@@ -969,13 +971,12 @@ module unid_controle (
                         //tres bits
                         ALUControl = 3'b010;
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
+                        muxPCControl = 3'b100;
                         muxRegControl = 3'b001;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end else if (Counter == 6'd1  || Counter == 6'd2) 
@@ -1001,9 +1002,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00; 
@@ -1022,7 +1021,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end else if (Counter == 6'd3) // pegar o valor da memoria e dar um carrega A
@@ -1033,13 +1031,13 @@ module unid_controle (
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
-                        RegAWrite = 1'b1;
+                        RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
-                        MDRWrite = 1'b0;
+                        MDRWrite = 1'b1;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-                        EPCWrite = 1'b1;
+                        EPCWrite = 1'b0;
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b0;
@@ -1048,12 +1046,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
-                        ALU2Control = 2'b00; 
+                        ALU2Control = 2'b00;
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -1069,9 +1065,8 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
-                    end else if (Counter == 6'd4) //passa para MUXpc e registra em PC
+                    end else if (Counter == 6'd4)
                     begin
                         State = ST_COMMON;
 
@@ -1085,7 +1080,7 @@ module unid_controle (
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-                        EPCWrite = 1'b1;
+                        EPCWrite = 1'b0;
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b0;
@@ -1094,12 +1089,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
-                        ALU1Control = 2'b01;
-                        ALU2Control = 2'b00; 
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -1109,13 +1102,12 @@ module unid_controle (
                         //tres bits
                         ALUControl = 3'b000; 
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b101;
+                        muxPCControl = 3'b001;
                         muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
                     end
                 end
@@ -1142,9 +1134,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10; 
@@ -1163,7 +1153,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
@@ -1188,9 +1177,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                    
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10;
@@ -1209,7 +1196,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 3'b000;
                     end
                 end
@@ -1236,8 +1222,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -1257,7 +1241,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
@@ -1282,9 +1265,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
@@ -1303,7 +1284,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                 end
@@ -1330,9 +1310,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00;
@@ -1351,7 +1329,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd1) begin
@@ -1376,9 +1353,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00;
@@ -1397,7 +1372,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
                         
                         if (ovf == 1'b1) 
@@ -1429,9 +1403,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -1450,7 +1422,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if(Counter == 6'd33) begin
@@ -1475,8 +1446,6 @@ module unid_controle (
                         muxHiControl = 1'b1;
                         muxLoControl = 1'b1;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -1496,7 +1465,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
 
                         if (divz == 1'b1)
@@ -1520,7 +1488,7 @@ module unid_controle (
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
+                        EPCWrite = 1'b1;
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b0;
@@ -1529,12 +1497,10 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
-                        ALU1Control = 2'b01;
-                        ALU2Control = 2'b00; 
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b01; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -1542,15 +1508,14 @@ module unid_controle (
                         exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b001;
+                        ALUControl = 3'b010;
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxPCControl = 3'b100;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
 
                     end else if (Counter == 6'd1  || Counter == 6'd2) 
@@ -1576,11 +1541,11 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
-                        ALU1Control = 2'b01;
+                        ALU1Control = 2'b00;
                         ALU2Control = 2'b00; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
@@ -1592,8 +1557,8 @@ module unid_controle (
                         ALUControl = 3'b001; 
                         muxDataControl = 3'b000;
                         muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
-                        muxAddressControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b011;
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
@@ -1602,7 +1567,7 @@ module unid_controle (
 
                     end else if (Counter == 6'd3)
                     begin
-                        State = ST_COMMON;
+                        State = ST_DIVZ;
 
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
@@ -1610,7 +1575,53 @@ module unid_controle (
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        AluOutWrite = 1'b1; 
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b1;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
+                        
+
+                        //dois bits
+                        ALU1Control = 2'b00;
+                        ALU2Control = 2'b00;
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b000;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+
+                        rst = 1'b0;
+
+                        Counter = Counter + 1;
+                    end else if (Counter == 6'd4)
+                    begin
+                        State = ST_COMMON;
+
+                        PCWrite = 1'b1;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
@@ -1623,11 +1634,11 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
-                        ALU1Control = 2'b01;
+                        ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
@@ -1636,10 +1647,10 @@ module unid_controle (
                         exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b001; 
+                        ALUControl = 3'b000; 
                         muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxPCControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
@@ -1671,8 +1682,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -1717,8 +1728,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -1765,8 +1776,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -1813,8 +1824,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -1861,8 +1872,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -1907,8 +1918,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -1955,8 +1966,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2001,8 +2012,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2029,12 +2040,6 @@ module unid_controle (
                     if(Counter == 6'd0) begin
                         State = ST_BNE; 
                         
-                        if(eq == 1'b0) begin
-                            PCWrite = 1'b1;   
-                        end
-                        else if(eq == 1'b1) begin
-                            PCWrite = 1'b0;
-                        end
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2053,8 +2058,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2076,14 +2081,11 @@ module unid_controle (
                         rst = 1'b0;
                         Counter = Counter + 1;
                     end
-                    else if(Counter == 1'd1) begin
+                    else if(Counter == 6'd1) begin
                         State = ST_COMMON;
 
                         if(eq == 1'b0) begin
                             PCWrite = 1'b1;   
-                        end
-                        else if(eq == 1'b1) begin
-                            PCWrite = 1'b0;
                         end 
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
@@ -2103,8 +2105,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2134,9 +2136,6 @@ module unid_controle (
                         if(eq == 1'b1) begin
                             PCWrite = 1'b1;   
                         end
-                        else if(eq == 1'b0) begin
-                            PCWrite = 1'b0;
-                        end
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2155,8 +2154,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2184,9 +2183,6 @@ module unid_controle (
                         if(eq == 1'b1) begin
                             PCWrite = 1'b1;   
                         end
-                        else if(eq == 1'b0) begin
-                            PCWrite = 1'b0;
-                        end 
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2205,8 +2201,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2235,9 +2231,6 @@ module unid_controle (
                         if(gt == 1'b0) begin
                             PCWrite = 1'b1;   
                         end
-                        else if(gt == 1'b1) begin
-                            PCWrite = 1'b0;
-                        end
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2256,8 +2249,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2285,9 +2278,6 @@ module unid_controle (
                         if(gt == 1'b0) begin
                             PCWrite = 1'b1;   
                         end
-                        else if(gt == 1'b1) begin
-                            PCWrite = 1'b0;
-                        end 
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2306,8 +2296,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2334,12 +2324,7 @@ module unid_controle (
                     if(Counter == 6'd0) begin
                         State = ST_BGT;
 
-                        if(gt == 1'b1) begin
-                            PCWrite = 1'b1;   
-                        end
-                        else if(gt == 1'b0) begin
-                            PCWrite = 1'b0;
-                        end
+                        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2358,8 +2343,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2387,9 +2372,6 @@ module unid_controle (
                         if(gt == 1'b1) begin
                             PCWrite = 1'b1;   
                         end
-                        else if(gt == 1'b0) begin
-                            PCWrite = 1'b0;
-                        end 
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
@@ -2408,8 +2390,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -2455,9 +2437,9 @@ module unid_controle (
                     muxHiControl = 1'b0;
                     muxLoControl = 1'b0;
                     muxMemWrite = 1'b0;
-                    MemRead = 1'b0;
                     
-                    RegAuxWrite = 1'b0;
+                    
+                    
 
                     //dois bits
                     ALU1Control = 2'b00;
@@ -2501,10 +2483,10 @@ module unid_controle (
                     muxHiControl = 1'b0;
                     muxLoControl = 1'b0;
                     muxMemWrite = 1'b0;
-                    MemRead = 1'b0;
                     
                     
-                    RegAuxWrite = 1'b0;
+                    
+                    
 
                     //dois bits
                     ALU1Control = 2'b00;
@@ -2550,8 +2532,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2596,8 +2578,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2621,8 +2603,6 @@ module unid_controle (
                         Counter = 6'd0;
                     end
                 end
-                //ADICIONAR SRAM
-
                 ST_JAL: begin
                     if(Counter == 6'd0) begin
                         State = ST_JAL;
@@ -2646,8 +2626,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2692,8 +2672,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2740,8 +2720,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2785,8 +2765,8 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2831,8 +2811,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -2879,9 +2857,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -2924,9 +2900,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -2970,9 +2944,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b01; 
@@ -3017,9 +2989,7 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;   
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -3064,9 +3034,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3111,9 +3079,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3159,9 +3125,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00 ;
@@ -3205,9 +3169,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                        
-                        RegAuxWrite = 1'b0;
-
+                                                
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3251,9 +3213,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                                          
-                        RegAuxWrite = 1'b0;
-
+                                                                  
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3298,9 +3258,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00 ;
@@ -3344,9 +3302,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                        
-                        RegAuxWrite = 1'b0;
-
+                                                
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3389,9 +3345,7 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                                          
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;                                                           
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -3435,9 +3389,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                                          
-                        RegAuxWrite = 1'b0;
-
+                                                                  
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3480,9 +3432,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01; //valor de A
                         ALU2Control = 2'b00; 
@@ -3528,9 +3478,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01; //pegar o valor de A 
                         ALU2Control = 2'b10; //offset
@@ -3574,9 +3522,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;                        
-                        RegAuxWrite = 1'b0;
-
+                                                
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00; 
@@ -3595,7 +3541,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd2) begin
@@ -3620,8 +3565,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3639,9 +3583,7 @@ module unid_controle (
                         muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
-                        
                         rst = 1'b0;
-
                         Counter = 0;
                     end
                 end
@@ -3669,8 +3611,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                    
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10;
@@ -3689,7 +3630,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd1) begin
@@ -3714,9 +3654,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -3735,7 +3673,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd2) begin
@@ -3760,9 +3697,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00; 
@@ -3781,7 +3716,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
   
                         rst = 1'b0;
-
                         Counter = 0;
                     end
                 end
@@ -3809,9 +3743,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;      
-                        RegAuxWrite = 1'b0;
-
+                              
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10;
@@ -3830,7 +3762,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd1) begin
@@ -3854,9 +3785,7 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;   
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -3876,7 +3805,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd2) begin
@@ -3901,9 +3829,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00 ;
@@ -3922,7 +3848,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
                        
                         rst = 1'b0;
-
                         Counter = 0;
                     end
                 end
@@ -3950,8 +3875,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b01;
@@ -3971,7 +3894,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd1 || Counter == 6'd2 || Counter == 6'd3) begin
@@ -3996,9 +3918,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b10; 
@@ -4017,7 +3937,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
                         
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd4) begin
@@ -4042,9 +3961,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4062,10 +3979,7 @@ module unid_controle (
                         muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
- 
-                        
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd5) begin
@@ -4090,9 +4004,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4139,9 +4051,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                    
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10;
@@ -4159,13 +4069,11 @@ module unid_controle (
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
-
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd1 || Counter == 6'd2 || Counter == 6'd3) begin
-                        State = ST_LB; //
+                        State = ST_LB; 
 
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
@@ -4186,9 +4094,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4206,15 +4112,12 @@ module unid_controle (
                         muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
-
-                        
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd4) begin
-                        State = ST_LB; //
-
+                        State = ST_LB; 
+                        
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
@@ -4234,9 +4137,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4255,7 +4156,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd5) begin
@@ -4280,9 +4180,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4301,7 +4199,6 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-
                         Counter = 6'd0;
                     end
                 end
@@ -4328,9 +4225,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10; 
@@ -4373,9 +4268,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4397,7 +4290,7 @@ module unid_controle (
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd4) begin
-                        State = ST_LH; //
+                        State = ST_LH; 
 
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
@@ -4418,9 +4311,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4438,10 +4329,7 @@ module unid_controle (
                         muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
-
-                        
                         rst = 1'b0;
-
                         Counter = Counter + 1;
                     end
                     else if (Counter == 6'd5) begin
@@ -4466,9 +4354,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b00;
                         ALU2Control = 2'b00;
@@ -4486,14 +4372,12 @@ module unid_controle (
                         muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
 
-                        
                         rst = 1'b0;
-
                         Counter = 6'd0;
                     end
                 end
                 ST_SRAM: begin
-                    if (Counter == 6'd0) begin
+                    if (Counter == 6'd0) begin // Soma rs + offset
                         State = ST_SRAM;
 
                         PCWrite = 1'b0;
@@ -4515,9 +4399,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b10; 
@@ -4529,16 +4411,16 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b001; 
-                        muxDataControl = 3'b000;
+                        muxDataControl = 3'b001;
                         muxPCControl = 3'b000;
                         muxRegControl = 3'b001;
-                        muxAddressControl = 3'b000;
+                        muxAddressControl = 3'b100;
                         ShiftControl = 3'b000;
                        
                         rst = 1'b0;
                         Counter = Counter + 1;
                     end
-                    else if (Counter == 6'd1) begin
+                    else if (Counter == 6'd1) begin // Joga o valor de ALUOut no endereço da memória
                         State = ST_SRAM;
 
                         PCWrite = 1'b0;
@@ -4560,9 +4442,7 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
@@ -4574,7 +4454,7 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b000; 
-                        muxDataControl = 3'b000;
+                        muxDataControl = 3'b001;
                         muxPCControl = 3'b000;
                         muxRegControl = 3'b001;
                         muxAddressControl = 3'b100;
@@ -4583,7 +4463,136 @@ module unid_controle (
                         rst = 1'b0;
                         Counter = Counter + 1;
                     end
-                    else if (Counter == 6'd2) begin
+                    else if (Counter == 6'd2 || Counter == 6'd3 || Counter == 6'd4) begin // Salva o valor da memória em MDR
+                        State = ST_SRAM;
+
+				        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b1;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
+                        //dois bits
+                        ALU1Control = 2'b10;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000;
+                        muxDataControl = 3'b001;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b001;
+                        muxAddressControl = 3'b100;
+                        ShiftControl = 3'b000;
+                       
+                        rst = 1'b0;
+                        Counter = Counter + 1;
+				    end
+                    else if (Counter == 6'd5) begin // Passa B para ALUOut e dá load de Mem[rs+offset] em rt
+                        State = ST_SRAM;
+
+				        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b1; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
+                        //dois bits
+                        ALU1Control = 2'b10;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b10;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b001;        // Somando B+0, para passar B
+                        muxDataControl = 3'b001;    // Entrada do valor do load
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b001;     // rt
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+                       
+                        rst = 1'b0;
+                        Counter = Counter + 1;
+				    end
+				    else if (Counter == 6'd6) begin // Registra o valor de B em rs
+                        State = ST_SRAM;
+
+				        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b1;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b00;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
+
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b010;    // ALUOut
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b000;     // rs
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b000;
+                       
+                        rst = 1'b0;
+                        Counter = Counter + 1;
+				    end
+                    else if (Counter == 6'd7) begin // Grava o valor de rs em A e o rt em B
                         State = ST_SRAM;
 
 				        PCWrite = 1'b0;
@@ -4600,59 +4609,12 @@ module unid_controle (
                         divControl = 1'b0;
                         multControl = 1'b0;
                         muxAControl = 1'b1;
-                        muxBControl = 1'b1;
-                        muxExtControl = 1'b0;
-                        muxHiControl = 1'b0;
-                        muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
-                        //dois bits
-                        ALU1Control = 2'b01;
-                        ALU2Control = 2'b00; 
-                        muxShamtControl = 2'b00;
-                        muxShiftInControl = 2'b00;
-                        storeSel = 2'b00;
-                        loadSel = 2'b00;
-                        exceptionControl = 2'b00;
-
-                        //tres bits
-                        ALUControl = 3'b000; 
-                        muxDataControl = 3'b000;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
-                        muxAddressControl = 3'b000;
-                        ShiftControl = 3'b000;
-                       
-                        rst = 1'b0;
-                        Counter = Counter + 1;
-				    end
-				    else if (Counter == 6'd3) begin
-                        State = ST_SRAM;
-
-				        PCWrite = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
-                        RegWrite = 1'b0;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        AluOutWrite = 1'b0; 
-                        MDRWrite = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        divControl = 1'b0;
-                        multControl = 1'b0;
-                        muxAControl = 1'b0;
                         muxBControl = 1'b0;
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
@@ -4664,16 +4626,16 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b000; 
-                        muxDataControl = 3'b000;
+                        muxDataControl = 3'b010;
                         muxPCControl = 3'b000;
                         muxRegControl = 3'b001;
                         muxAddressControl = 3'b000;
-                        ShiftControl = 3'b001;
+                        ShiftControl = 3'b000;
                        
                         rst = 1'b0;
                         Counter = Counter + 1;
 				    end
-                    else if (Counter == 6'd4) begin
+                    else if (Counter == 6'd8) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): load no shift reg
                         State = ST_SRAM;
 
 				        PCWrite = 1'b0;
@@ -4695,9 +4657,50 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        
+                        //dois bits
+                        ALU1Control = 2'b01;
+                        ALU2Control = 2'b00; 
+                        muxShamtControl = 2'b01;
+                        muxShiftInControl = 2'b00;
+                        storeSel = 2'b00;
+                        loadSel = 2'b00;
+                        exceptionControl = 2'b00;
 
+                        //tres bits
+                        ALUControl = 3'b000; 
+                        muxDataControl = 3'b110;
+                        muxPCControl = 3'b000;
+                        muxRegControl = 3'b001;
+                        muxAddressControl = 3'b000;
+                        ShiftControl = 3'b001;
+                       
+                        rst = 1'b0;
+                        Counter = Counter + 1;
+				    end
+                    else if (Counter == 6'd9) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): operação no shift reg
+                        State = ST_SRAM;
+
+				        PCWrite = 1'b0;
+                        MemWrite = 1'b0;
+                        instructRegWrite = 1'b0;
+                        RegWrite = 1'b0;
+                        RegAWrite = 1'b0;
+                        RegBWrite = 1'b0;
+                        AluOutWrite = 1'b0; 
+                        MDRWrite = 1'b0;
+                        HiWrite = 1'b0;
+                        LoWrite = 1'b0;
+                        EPCWrite = 1'b0;
+                        divControl = 1'b0;
+                        multControl = 1'b0;
+                        muxAControl = 1'b0;
+                        muxBControl = 1'b0;
+                        muxExtControl = 1'b0;
+                        muxHiControl = 1'b0;
+                        muxLoControl = 1'b0;
+                        muxMemWrite = 1'b0;
+                        
                         //dois bits
                         ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
@@ -4718,7 +4721,7 @@ module unid_controle (
                         rst = 1'b0;
                         Counter = Counter + 1;
 				    end
-                    else if (Counter == 6'd5) begin
+                    else if (Counter == 6'd10) begin // Escreve o resultado do SRA em rt
                         State = ST_COMMON;
 
 				        PCWrite = 1'b0;
@@ -4727,7 +4730,7 @@ module unid_controle (
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        AluOutWrite = 1'b1; 
+                        AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
@@ -4736,16 +4739,14 @@ module unid_controle (
                         multControl = 1'b0;
                         muxAControl = 1'b0;
                         muxBControl = 1'b0;
-                        muxExtControl = 1'b1;
+                        muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
-
+                        
                         //dois bits
                         ALU1Control = 2'b01;
-                        ALU2Control = 2'b10; 
+                        ALU2Control = 2'b00; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
                         storeSel = 2'b00;
@@ -4753,7 +4754,7 @@ module unid_controle (
                         exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b001; 
+                        ALUControl = 3'b000; 
                         muxDataControl = 3'b110;
                         muxPCControl = 3'b000;
                         muxRegControl = 3'b001;
@@ -4761,7 +4762,7 @@ module unid_controle (
                         ShiftControl = 3'b000;
                        
                         rst = 1'b0;
-                        Counter = 0;
+                        Counter = 6'd0;
 				    end
                 end
                 ST_XCHG: begin
@@ -4786,9 +4787,7 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;                                           
 
                         //dois bits
                         ALU1Control = 2'b10;
@@ -4831,12 +4830,10 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;                                           
 
                         //dois bits
-                        ALU1Control = 2'b11;
+                        ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
@@ -4876,12 +4873,10 @@ module unid_controle (
                         muxExtControl = 1'b0;
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
+                        muxMemWrite = 1'b0;             
 
                         //dois bits
-                        ALU1Control = 2'b11;
+                        ALU1Control = 2'b01;
                         ALU2Control = 2'b00; 
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
@@ -4922,8 +4917,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -4943,7 +4936,7 @@ module unid_controle (
                         ShiftControl = 3'b000;
                        
                         rst = 1'b0;
-                        Counter = 0;
+                        Counter = 6'd0;
 				    end
                 end
                 ST_BREAK: begin
@@ -4968,8 +4961,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
@@ -5015,8 +5006,6 @@ module unid_controle (
                         muxHiControl = 1'b0;
                         muxLoControl = 1'b0;
                         muxMemWrite = 1'b0;
-                        MemRead = 1'b0;
-                        RegAuxWrite = 1'b0;
 
                         //dois bits
                         ALU1Control = 2'b00;
