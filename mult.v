@@ -8,40 +8,72 @@ module mult(
   output reg [31:0] LO  // bits menos significativos
 );
 
-  reg [31:0] multiplicand; // multiplicando
-  reg [31:0] multiplier;   // multiplicador
-  reg [63:0] result;       // Resultado temporário 
-  reg [5:0]  cycle;        // Contador de ciclos
-  reg ok; // sinal de controle
+    reg [31:0] multiplicand; //multiplicando
+    reg [31:0] multiplier;   //multiplicador
+    reg Q1;
+    reg [31:0] A;
+  	reg [5:0] counter; //operação em até 32 ciclos
 
-  always @(posedge clk or posedge reset) begin
-    if (reset) begin
-      multiplicand <= 0;
-      multiplier <= 0;
-      result <= 0;
-      cycle <= 0;
-      ok <= 0;
+  	reg aux = 1;
+  	
+  always @ (posedge clk) begin
+    
+    if(multControl == 1'b1 && reset == 1'b0) begin
+      
+      if(counter == 6'b000000) begin
+        
+        multiplier = aInput;
+        multiplicand = bInput;
+        counter = counter + 1;
+        
+      end
+      else begin
+        
+        if(multiplier[0] == 1'b1 && Q1 == 1'b0) begin
+          
+          A = A - multiplicand;
+        
+        end
+        
+        else if(multiplier[0] == 1'b0 && Q1 == 1'b1) begin
+          
+          A = A + multiplicand;
+          
+        end
+        
+        {A, multiplier, Q1} = {A, multiplier, Q1} >> 1'b1;
+        
+        
+        if(A[30] == 1'b1) begin
+          
+          A[31] = 1'b1;
+          
+        end         
+
+        counter = counter + 1;
+        
+      end //else
+    
+      if(counter == 6'b100001) begin
+        
+        LO = multiplier;
+        HI = A;
+        
+      end
+        
+      
+    end //if1
+    
+    else begin
+      
+      counter = 6'b000000;
+      multiplier = 32'b00000000000000000000000000000000;
+      multiplicand = 32'b00000000000000000000000000000000;
+      Q1 = 1'b0;
+      A = 32'b00000000000000000000000000000000;
+      
     end
-    else if (multControl) begin
-      // Inicialização da multiplicação
-      multiplicand <= aInput;
-      multiplier <= bInput;
-      result <= 64'b0; 
-      cycle <= 6'd31; // 32 ciclos para multiplicação de 32 bits
-
-      // Ativar a multiplicação
-      ok <= 1;
-    end
-    else if (ok) begin
-      // Realizar a multiplicação
-      result <= result + {multiplicand, multiplier};
-      multiplicand <= multiplicand << 1;
-      multiplier <= multiplier >> 1;
-      cycle <= cycle - 6'd1;
-    end
-  end
-
-  assign HI = result[63:32];
-  assign LO = result[31:0];
-
+  
+  end //always
+  
 endmodule
