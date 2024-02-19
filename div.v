@@ -1,3 +1,33 @@
+/**
+ * Módulo de divisão.
+ *
+ * Este módulo implementa a operação de divisão entre dois números de 32 bits.
+ * Ele recebe um sinal de clock (clk) e um sinal de reset (reset) para controlar o funcionamento.
+ * O sinal de controle (divControl) é usado para iniciar a operação de divisão.
+ * Os sinais de entrada (aInput e bInput) representam o dividendo e o divisor, respectivamente.
+ * Os sinais de saída (HI, LO e err) representam o quociente, o resto e um sinal de erro indicando divisão por zero.
+ *
+ * @param clk       Sinal de clock.
+ * @param reset     Sinal de reset.
+ * @param divControl Sinal de controle para iniciar a operação de divisão.
+ * @param aInput    Sinal de entrada representando o dividendo.
+ * @param bInput    Sinal de entrada representando o divisor.
+ * @param HI        Sinal de saída representando o quociente.
+ * @param LO        Sinal de saída representando o resto.
+ * @param err       Sinal de saída indicando erro de divisão por zero.
+ */
+module div(
+    input wire clk,
+    input wire reset,
+    input wire divControl,
+    input wire [31:0] aInput,
+    input wire [31:0] bInput,
+    output reg [31:0] HI,
+    output reg [31:0] LO,
+    output reg err
+);
+  // Restante do código...
+endmodule
 module div(  
     input wire clk,  
     input wire reset,  
