@@ -20,8 +20,8 @@ module CPU(
     wire LoWrite;
     wire EPCWrite;
     wire RegAWrite;
+    wire RegAuxWrite;
     wire RegBWrite;
-    //wire RegAuxWrite;
     wire MDRWrite;
     wire instructRegWrite;
 
@@ -88,6 +88,7 @@ module CPU(
     wire [31:0] muxMemWriteOut;             // Fio que sai do muxMemWrite
     wire [31:0] memOut;                     // Fio que sai da memória
     wire [31:0] mdrOut;                     // Fio que sai do MDR
+    wire [31:0] auxOut;                     // Fio que sai do registrador Aux
     wire [31:0] ssOut;                      // Fio que sai do Store Size
     wire [31:0] ls32Out;                    // Fio de 32 bits que sai do Load Size
     wire [31:0] ls16Out;                    // Fio de 16 bits que sai do Load Size
@@ -188,6 +189,13 @@ Registrador ALUOUT(
     aluResult, //saída da ULA
     aluOut
 );
+Registrador Aux( 
+    clk, 
+    reset, 
+    RegAuxWrite,
+    muxAOut, 
+    auxOut
+);
 
 //MUX's
 mux_A muxA( 
@@ -252,6 +260,7 @@ mux_ALU1 muxALU1(
     pcOut,
     aOut,
     zeroToMuxAlu1,
+    auxOut,
     muxAlu1Control,
     muxAlu1Out    
 );
@@ -445,6 +454,7 @@ unid_controle unidadecontrole(
     instructRegWrite,
     RegWrite,
     RegAWrite,
+    RegAuxWrite,
     RegBWrite,
     AluOutWrite,
     MDRWrite,
@@ -459,7 +469,6 @@ unid_controle unidadecontrole(
     muxHiControl,
     muxLoControl,
     muxMemWriteControl,
-    //RegAuxWrite,
     
     // dois bits
     muxAlu1Control,

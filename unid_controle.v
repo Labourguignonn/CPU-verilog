@@ -6,6 +6,7 @@ module unid_controle (
     output reg instructRegWrite,
     output reg RegWrite,
     output reg RegAWrite,
+    output reg RegAuxWrite,
     output reg RegBWrite,
     output reg AluOutWrite,
     output reg MDRWrite,
@@ -167,6 +168,7 @@ module unid_controle (
                 instructRegWrite = 1'b0;
                 RegWrite = 1'b1;
                 RegAWrite = 1'b0;
+                RegAuxWrite = 1'b0;
                 RegBWrite = 1'b0;
                 AluOutWrite = 1'b0;
                 MDRWrite = 1'b0;
@@ -211,6 +213,7 @@ module unid_controle (
                 instructRegWrite = 1'b0;
                 RegWrite = 1'b1;
                 RegAWrite = 1'b0;
+                RegAuxWrite = 1'b0;
                 RegBWrite = 1'b0;
                 AluOutWrite = 1'b0;
                 MDRWrite = 1'b0;
@@ -260,6 +263,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0;
                         MDRWrite = 1'b0;
@@ -304,6 +308,7 @@ module unid_controle (
                         instructRegWrite = 1'b1;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0;
                         MDRWrite = 1'b0;
@@ -348,6 +353,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b1;
+                        RegAuxWrite = 1'b1;
                         RegBWrite = 1'b1;
                         AluOutWrite = 1'b1;
                         MDRWrite = 1'b0;
@@ -522,6 +528,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -567,6 +574,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -610,6 +618,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -659,6 +668,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -702,6 +712,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -752,6 +763,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -796,6 +808,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -840,6 +853,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -883,6 +897,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -930,6 +945,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -973,6 +989,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1016,6 +1033,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -1059,6 +1077,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1104,6 +1123,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1147,6 +1167,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1192,6 +1213,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1235,6 +1257,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1280,6 +1303,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1323,6 +1347,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1372,6 +1397,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1415,6 +1441,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1465,6 +1492,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1508,6 +1536,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1552,6 +1581,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -1595,6 +1625,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1640,6 +1671,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1683,6 +1715,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1728,6 +1761,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1773,6 +1807,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1818,6 +1853,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1846,7 +1882,7 @@ module unid_controle (
                         ALUControl = 3'b000; 
                         muxDataControl = 3'b000;
                         muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
@@ -1861,6 +1897,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1889,7 +1926,7 @@ module unid_controle (
                         ALUControl = 3'b000;
                         muxDataControl = 3'b000;
                         muxPCControl = 3'b010;
-                        muxRegControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
@@ -1906,6 +1943,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -1949,6 +1987,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -1993,6 +2032,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2038,6 +2078,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2085,6 +2126,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2130,6 +2172,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2176,6 +2219,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2221,6 +2265,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2266,6 +2311,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2311,6 +2357,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2348,13 +2395,15 @@ module unid_controle (
                     end
                 end
                 ST_SLTI: begin
+                    if(Counter == 6'd0) begin
                         State = ST_COMMON;
 
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b0;
+                        RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2372,7 +2421,7 @@ module unid_controle (
                         muxMemWrite = 1'b0;
 
                         //dois bits
-                        ALU1Control = 2'b00;
+                        ALU1Control = 2'b01;
                         ALU2Control = 2'b10;
                         muxShamtControl = 2'b00;
                         muxShiftInControl = 2'b00;
@@ -2381,7 +2430,7 @@ module unid_controle (
                         exceptionControl = 2'b00;
 
                         //tres bits
-                        ALUControl = 3'b000;
+                        ALUControl = 3'b111; //comparação
                         muxDataControl = 3'b111;
                         muxPCControl = 3'b000;
                         muxRegControl = 3'b001;
@@ -2390,14 +2439,17 @@ module unid_controle (
 
                         rst = 1'b0;
                         Counter = 6'd0;
+                    end
                 end
                 ST_LUI: begin
+                    if(Counter == 6'd0) begin
                         State = ST_COMMON;
                         PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2433,6 +2485,7 @@ module unid_controle (
                             
                         rst = 1'b0;
                         Counter = 6'd0;
+                    end
                 end
                 ST_J: begin
                     if(Counter == 6'd0) begin
@@ -2443,6 +2496,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2486,6 +2540,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2531,8 +2586,9 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        AluOutWrite = 1'b0; //pode ser 1
+                        AluOutWrite = 1'b1; //pode ser 1
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
@@ -2557,9 +2613,9 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b000;
-                        muxDataControl = 3'b000;
+                        muxDataControl = 3'b010;
                         muxPCControl = 3'b011;
-                        muxRegControl = 3'b001;
+                        muxRegControl = 3'b011;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b000;
 
@@ -2574,8 +2630,9 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        AluOutWrite = 1'b0; 
+                        AluOutWrite = 1'b0;
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
@@ -2619,6 +2676,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2662,6 +2720,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2705,6 +2764,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2750,6 +2810,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2793,6 +2854,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2836,6 +2898,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2881,6 +2944,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2924,6 +2988,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -2967,6 +3032,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3013,6 +3079,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3056,6 +3123,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3099,6 +3167,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3143,6 +3212,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3186,6 +3256,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3229,6 +3300,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3261,49 +3333,7 @@ module unid_controle (
                         ShiftControl = 3'b000;
 
                         rst = 1'b0;
-                        Counter = Counter + 1;
-                    end
-                    else if(Counter == 6'd2) begin
-                        State = ST_COMMON;
-
-                        PCWrite = 1'b0;
-                        MemWrite = 1'b0;
-                        instructRegWrite = 1'b0;
-                        RegWrite = 1'b1;
-                        RegAWrite = 1'b0;
-                        RegBWrite = 1'b0;
-                        AluOutWrite = 1'b0; 
-                        MDRWrite = 1'b0;
-                        HiWrite = 1'b0;
-                        LoWrite = 1'b0;
-                        EPCWrite = 1'b0;
-                        divControl = 1'b0;
-                        multControl = 1'b0;
-                        muxAControl = 1'b0;
-                        muxBControl = 1'b0;
-                        muxExtControl = 1'b0;
-                        muxHiControl = 1'b0;
-                        muxLoControl = 1'b0;
-                        muxMemWrite = 1'b0;
-                                                                  
-                        //dois bits
-                        ALU1Control = 2'b00;
-                        ALU2Control = 2'b00;
-                        muxShamtControl = 2'b00;
-                        muxShiftInControl = 2'b00;
-                        storeSel = 2'b00;
-                        loadSel = 2'b00;
-                        exceptionControl = 2'b00;
-
-                        //tres bits
-                        ALUControl = 3'b000 ;
-                        muxDataControl = 3'b110;
-                        muxPCControl = 3'b000;
-                        muxRegControl = 3'b100;
-                        ShiftControl = 3'b000;
-
-                        rst = 1'b0;
-                        Counter = 6'd0;   ///
+                        Counter = 6'd0;
                     end
                 end
                 ST_SLT: begin
@@ -3314,6 +3344,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3358,6 +3389,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; //grava o valor 
                         MDRWrite = 1'b0;
@@ -3401,6 +3433,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3444,6 +3477,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3489,6 +3523,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -3532,6 +3567,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3575,6 +3611,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3620,6 +3657,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -3663,6 +3701,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3706,6 +3745,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3751,6 +3791,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -3794,6 +3835,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -3837,6 +3879,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3880,6 +3923,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -3925,6 +3969,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -3968,6 +4013,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -4011,6 +4057,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4054,6 +4101,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4099,6 +4147,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -4142,6 +4191,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -4185,6 +4235,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4228,6 +4279,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4273,6 +4325,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1;
                         MDRWrite = 1'b0;
@@ -4316,6 +4369,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4359,6 +4413,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b1;
@@ -4402,6 +4457,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -4445,6 +4501,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4488,6 +4545,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b1;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b1;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4523,7 +4581,7 @@ module unid_controle (
                         rst = 1'b0;
                         Counter = Counter + 1;
 				    end
-                    else if (Counter == 6'd8) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): load no shift reg
+                    else if (Counter == 6'd8) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): load no shift reg // Carrega aux
                         State = ST_SRAM;
 
 				        PCWrite = 1'b0;
@@ -4531,8 +4589,9 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
-                        AluOutWrite = 1'b0; 
+                        AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
                         HiWrite = 1'b0;
                         LoWrite = 1'b0;
@@ -4547,7 +4606,7 @@ module unid_controle (
                         muxMemWrite = 1'b0;
                         
                         //dois bits
-                        ALU1Control = 2'b01;
+                        ALU1Control = 2'b11;
                         ALU2Control = 2'b00; 
                         muxShamtControl = 2'b01;
                         muxShiftInControl = 2'b00;
@@ -4557,23 +4616,24 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b000; 
-                        muxDataControl = 3'b110;
+                        muxDataControl = 3'b010;
                         muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b001;
                        
                         rst = 1'b0;
                         Counter = Counter + 1;
 				    end
-                    else if (Counter == 6'd9) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): operação no shift reg
+                    else if (Counter == 6'd9) begin // Fazer o SRA A >> B (rt >> Mem[rs+offset]): operação no shift reg // rs <- aux
                         State = ST_SRAM;
 
 				        PCWrite = 1'b0;
                         MemWrite = 1'b0;
                         instructRegWrite = 1'b0;
-                        RegWrite = 1'b0;
+                        RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4600,9 +4660,9 @@ module unid_controle (
 
                         //tres bits
                         ALUControl = 3'b000; 
-                        muxDataControl = 3'b110;
+                        muxDataControl = 3'b010;
                         muxPCControl = 3'b000;
-                        muxRegControl = 3'b001;
+                        muxRegControl = 3'b000;
                         muxAddressControl = 3'b000;
                         ShiftControl = 3'b100;
                        
@@ -4617,6 +4677,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4662,6 +4723,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1;
                         MDRWrite = 1'b0;
@@ -4705,6 +4767,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4748,6 +4811,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b1; 
                         MDRWrite = 1'b0;
@@ -4791,6 +4855,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b1;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4835,6 +4900,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0;
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
@@ -4879,6 +4945,7 @@ module unid_controle (
                         instructRegWrite = 1'b0;
                         RegWrite = 1'b0; //pode ser 1
                         RegAWrite = 1'b0;
+                        RegAuxWrite = 1'b0;
                         RegBWrite = 1'b0;
                         AluOutWrite = 1'b0; 
                         MDRWrite = 1'b0;
